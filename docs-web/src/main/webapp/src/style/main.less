@@ -1,3 +1,6 @@
+// 红白主题
+@import "theme.less";
+
 // Logo
 .navbar-logo {
   margin: 3px;
@@ -11,7 +14,9 @@
 
 // Navbar color
 .navbar {
-  background-color: #24292e;
+  background-color: #fff;
+  border-bottom: 3px solid #c41230;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 // Selected table line
@@ -192,7 +197,7 @@ ul.tag-tree {
 // File thumbnails
 .thumbnail {
   &.active {
-    border: 1px solid #2ab2dc;
+    border: 1px solid #c41230;
   }
 
   .file-processing-indicator {
@@ -200,7 +205,7 @@ ul.tag-tree {
     z-index: 2;
     margin-left: 8px;
     margin-top: 8px;
-    color: #2ab2dc;
+    color: #c41230;
   }
 
   a.file-thumbnail {
@@ -425,7 +430,7 @@ input[readonly].share-link {
 
     .list-group-item.active {
       background: none;
-      color: #337ab7;
+      color: #c41230;
       font-weight: 500;
     }
   }
@@ -563,7 +568,14 @@ input[readonly].share-link {
   }
 
   .btn-primary {
-    background-color: #2aabd2;
+    background-color: #c41230;
+    border-color: transparent;
+  }
+
+  .btn-primary:hover,
+  .btn-primary:focus,
+  .btn-primary:active {
+    background-color: #a01020;
     border-color: transparent;
   }
 
@@ -677,7 +689,16 @@ input[readonly].share-link {
   border: none;
 
   .navbar-brand {
-    color: white;
+    color: #c41230;
+  }
+
+  .navbar-nav > li > a {
+    color: #333;
+  }
+
+  .navbar-nav > li > a:hover,
+  .navbar-nav > li > a:focus {
+    color: #c41230;
   }
 }
 
@@ -693,7 +714,7 @@ input[readonly].share-link {
 .navbar-default .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:hover,
 .navbar-default .navbar-nav > .active > a:focus {
-  color: #2ab2dc;
+  color: #c41230;
   background: none;
 }
 
