@@ -17,5 +17,8 @@ teedy-importer-win.exe
 docs/*
 !docs/.gitkeep
 
+.vscode/
+agent_tmp/
+
 #macos
 .DS_Store

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 install_macos_dependencies() {
-  brew install openjdk@11
-  export JAVA_HOME=/usr/local/opt/openjdk@11
+  brew install openjdk@17
+  export JAVA_HOME=/usr/local/opt/openjdk@17
   brew install maven
   brew install node
   npm install -g grunt-cli
@@ -13,12 +13,12 @@ install_macos_dependencies() {
 
 install_ubuntu_debian_dependencies() {
   sudo apt update
-  sudo apt install -y openjdk-11-jdk maven nodejs npm tesseract-ocr ffmpeg mediainfo
+  sudo apt install -y openjdk-17-jdk maven nodejs npm tesseract-ocr ffmpeg mediainfo
   sudo npm install -g grunt-cli
 }
 
 install_fedora_dependencies() {
-  sudo dnf install -y java-11-openjdk-devel maven nodejs npm tesseract ffmpeg mediainfo
+  sudo dnf install -y java-17-openjdk-devel maven nodejs npm tesseract ffmpeg mediainfo
   sudo npm install -g grunt-cli
 }
 
