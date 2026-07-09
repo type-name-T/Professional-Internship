@@ -48,6 +48,21 @@ public class UserDto {
      */
     private String totpKey;
 
+    /**
+     * Administrator type.
+     */
+    private String adminType;
+
+    /**
+     * User secrecy clearance level.
+     */
+    private String secrecyLevel;
+
+    /**
+     * Whether the user is a classifier.
+     */
+    private boolean classifier;
+
     public String getId() {
         return id;
     }
@@ -111,6 +126,30 @@ public class UserDto {
 
     public void setTotpKey(String totpKey) {
         this.totpKey = totpKey;
+    }
+
+    public String getAdminType() {
+        return adminType;
+    }
+
+    public void setAdminType(String adminType) {
+        this.adminType = adminType;
+    }
+
+    public String getSecrecyLevel() {
+        return secrecyLevel;
+    }
+
+    public void setSecrecyLevel(String secrecyLevel) {
+        this.secrecyLevel = secrecyLevel;
+    }
+
+    public boolean isClassifier() {
+        return classifier;
+    }
+
+    public void setClassifier(boolean classifier) {
+        this.classifier = classifier;
     }
 
     @Override

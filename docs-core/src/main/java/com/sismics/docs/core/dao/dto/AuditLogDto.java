@@ -1,101 +1,32 @@
 package com.sismics.docs.core.dao.dto;
 
-import com.sismics.docs.core.constant.AuditLogType;
-
 /**
  * Audit log DTO.
- *
- * @author bgamard 
  */
 public class AuditLogDto {
-    /**
-     * Audit log ID.
-     */
     private String id;
-    
-    /**
-     * Username.
-     */
+    private String userId;
     private String username;
-    
-    /**
-     * Entity ID.
-     */
-    private String entityId;
-    
-    /**
-     * Entity class.
-     */
-    private String entityClass;
-    
-    /**
-     * Audit log type.
-     */
-    private AuditLogType type;
-    
-    /**
-     * Audit log message.
-     */
-    private String message;
-    
-    /**
-     * Creation date.
-     */
-    private Long createTimestamp;
-    
-    public String getId() {
-        return id;
-    }
+    private String action;
+    private String targetId;
+    private String detail;
+    private String clientIp;
+    private long createTimestamp;
 
-    public void setId(String id) {
-        this.id = id;
-    }
-    
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(String entityId) {
-        this.entityId = entityId;
-    }
-
-    public String getEntityClass() {
-        return entityClass;
-    }
-
-    public void setEntityClass(String entityClass) {
-        this.entityClass = entityClass;
-    }
-
-    public AuditLogType getType() {
-        return type;
-    }
-
-    public void setType(AuditLogType type) {
-        this.type = type;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Long getCreateTimestamp() {
-        return createTimestamp;
-    }
-
-    public void setCreateTimestamp(Long createTimestamp) {
-        this.createTimestamp = createTimestamp;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    public String getAction() { return action; }
+    public void setAction(String action) { this.action = action; }
+    public String getTargetId() { return targetId; }
+    public void setTargetId(String targetId) { this.targetId = targetId; }
+    public String getDetail() { return detail; }
+    public void setDetail(String detail) { this.detail = detail; }
+    public String getClientIp() { return clientIp; }
+    public void setClientIp(String clientIp) { this.clientIp = clientIp; }
+    public long getCreateTimestamp() { return createTimestamp; }
+    public void setCreateTimestamp(long createTimestamp) { this.createTimestamp = createTimestamp; }
 }

@@ -103,6 +103,15 @@ public class DocumentSearchCriteriaUtil {
                 case "title":
                     documentCriteria.getTitleList().add(paramValue);
                     break;
+                case "secrecy_level":
+                    documentCriteria.setSecrecyLevel(paramValue);
+                    break;
+                case "status":
+                    documentCriteria.setStatus(paramValue);
+                    break;
+                case "classification":
+                    documentCriteria.setClassificationId(paramValue);
+                    break;
                 default:
                     fullQuery.add(criteria);
                     break;
@@ -153,6 +162,32 @@ public class DocumentSearchCriteriaUtil {
             String searchWorkflow,
             List<TagDto> allTagDtoList
     ) {
+        addHttpSearchParams(documentCriteria, searchBy, searchCreatedAfter, searchCreatedBefore, searchFull,
+                searchLang, searchMime, searchShared, searchSimple, searchTag, searchNotTag, searchTitle,
+                searchUpdatedAfter, searchUpdatedBefore, searchWorkflow, null, null, null, allTagDtoList);
+    }
+
+    public static void addHttpSearchParams(
+            DocumentCriteria documentCriteria,
+            String searchBy,
+            String searchCreatedAfter,
+            String searchCreatedBefore,
+            String searchFull,
+            String searchLang,
+            String searchMime,
+            Boolean searchShared,
+            String searchSimple,
+            String searchTag,
+            String searchNotTag,
+            String searchTitle,
+            String searchUpdatedAfter,
+            String searchUpdatedBefore,
+            String searchWorkflow,
+            String searchSecrecyLevel,
+            String searchStatus,
+            String searchClassification,
+            List<TagDto> allTagDtoList
+    ) {
         if (searchBy != null) {
             parseByCriteria(documentCriteria, searchBy);
         }
@@ -198,6 +233,15 @@ public class DocumentSearchCriteriaUtil {
         }
         if ((WORKFLOW_ME.equals(searchWorkflow))) {
             documentCriteria.setActiveRoute(true);
+        }
+        if (searchSecrecyLevel != null) {
+            documentCriteria.setSecrecyLevel(searchSecrecyLevel);
+        }
+        if (searchStatus != null) {
+            documentCriteria.setStatus(searchStatus);
+        }
+        if (searchClassification != null) {
+            documentCriteria.setClassificationId(searchClassification);
         }
     }
 

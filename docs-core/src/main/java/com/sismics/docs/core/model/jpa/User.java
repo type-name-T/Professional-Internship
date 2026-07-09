@@ -95,6 +95,24 @@ public class User implements Loggable {
     @Column(name = "USE_DISABLEDATE_D")
     private Date disableDate;
 
+    /**
+     * Administrator type: SystemAdmin, SecurityAdmin, AuditAdmin, NonAdmin.
+     */
+    @Column(name = "USE_ADMINTYPE_C", length = 20)
+    private String adminType;
+
+    /**
+     * User secrecy clearance level: Unclassified, GeneralClassified, MajorClassified, CoreClassified.
+     */
+    @Column(name = "USE_SECRECYLEVEL_C", length = 20)
+    private String secrecyLevel;
+
+    /**
+     * Whether the user is a classifier (定密责任人).
+     */
+    @Column(name = "USE_CLASSIFIER_B")
+    private boolean classifier;
+
     public String getId() {
         return id;
     }
@@ -210,6 +228,33 @@ public class User implements Loggable {
 
     public User setOnboarding(boolean onboarding) {
         this.onboarding = onboarding;
+        return this;
+    }
+
+    public String getAdminType() {
+        return adminType;
+    }
+
+    public User setAdminType(String adminType) {
+        this.adminType = adminType;
+        return this;
+    }
+
+    public String getSecrecyLevel() {
+        return secrecyLevel;
+    }
+
+    public User setSecrecyLevel(String secrecyLevel) {
+        this.secrecyLevel = secrecyLevel;
+        return this;
+    }
+
+    public boolean isClassifier() {
+        return classifier;
+    }
+
+    public User setClassifier(boolean classifier) {
+        this.classifier = classifier;
         return this;
     }
 

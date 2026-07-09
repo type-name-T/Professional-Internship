@@ -1,119 +1,247 @@
-<div class="well well-3d" style="background-color: #f6f9fc" id="quick-upload-zone">
-  <div class="pull-right" ng-show="files.length > 0">
-    <a href class="btn btn-default" ng-init="selectAll = true" ng-click="changeChecked(selectAll); selectAll = !selectAll">
-      <span class="far" ng-class="{ 'fa-check-square': selectAll, 'fa-square': !selectAll }"></span>
-      {{ selectAll ? 'document.default.select_all' : 'document.default.select_none' | translate }}
-    </a>
+<div class="gov-stats-row">
+  <div class="gov-stat-card">
+    <span class="fas fa-file-alt gov-stat-icon"></span>
+    <div class="gov-stat-value">1,234</div>
+    <div class="gov-stat-label">文档总数</div>
   </div>
-  <h3 class="well-3d-header text-muted">
-    {{ 'document.default.quick_upload' | translate }}
-  </h3>
+  <div class="gov-stat-card">
+    <span class="fas fa-users gov-stat-icon"></span>
+    <div class="gov-stat-value">56</div>
+    <div class="gov-stat-label">用户数量</div>
+  </div>
+  <div class="gov-stat-card">
+    <span class="fas fa-folder-open gov-stat-icon"></span>
+    <div class="gov-stat-value">89</div>
+    <div class="gov-stat-label">文件夹数</div>
+  </div>
+  <div class="gov-stat-card">
+    <span class="fas fa-cloud-upload-alt gov-stat-icon"></span>
+    <div class="gov-stat-value">2.5 GB</div>
+    <div class="gov-stat-label">存储容量</div>
+  </div>
+</div>
 
-  <div class="row upload-zone"
-       ngf-drop="fileDropped($files)"
-       ngf-drag-over-class="'bg-success'"
-       ngf-multiple="true"
-       ngf-allow-dir="false">
-    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 text-center" ng-repeat="file in files">
-      <div class="thumbnail" ng-class="{ 'thumbnail-checked': file.checked }" ng-if="file.id">
-        <a class="file-thumbnail" ng-click="openFile(file)">
-          <img ng-src="../api/file/{{ file.id }}/data?size=thumb" uib-tooltip="{{ file.mimetype }} | {{ file.size | filesize }}" tooltip-placement="top" />
+<div class="row">
+  <div class="col-md-8">
+    <div class="gov-card" id="quick-upload-zone">
+      <div class="pull-right" ng-show="files.length > 0">
+        <a
+          href
+          class="btn btn-default gov-btn-outline"
+          ng-init="selectAll = true"
+          ng-click="changeChecked(selectAll); selectAll = !selectAll"
+        >
+          <span
+            class="far"
+            ng-class="{ 'fa-check-square': selectAll, 'fa-square': !selectAll }"
+          ></span>
+          {{ selectAll ? 'document.default.select_all' :
+          'document.default.select_none' | translate }}
         </a>
-        <div class="file-info">
-          <div class="v-align">
-            <button class="btn btn-danger" ng-click="deleteFile($event, file)"><span class="fas fa-trash"></span></button>
-          </div>
-          <div class="v-align file-name" ng-if="file.name">{{ file.name }}</div>
-          <div class="v-align">
-            <input type="checkbox" ng-model="file.checked" />
-          </div>
-        </div>
+      </div>
+      <div class="gov-card-header">
+        <span class="fas fa-upload"></span>
+        {{ 'document.default.quick_upload' | translate }}
       </div>
 
-      <div class="thumbnail" ng-if="!file.id">
-        <p class="text-center lead">
-          {{ file.status }}
-        </p>
-        <div class="caption">
-          <uib-progressbar value="file.progress" class="progress-info active"></uib-progressbar>
-        </div>
-      </div>
-    </div>
-
-    <p class="text-center well-lg text-muted" ng-if="files.length == 0">
-      <span class="fas fa-arrows-alt"></span>
-      {{ 'document.default.drop_zone' | translate }}
-    </p>
-  </div>
-
-  <p class="text-center">
-    <button ng-show="checkedFiles().length > 0"
-            class="btn btn-primary"
-            ng-click="addDocument()">
-      <span class="fas fa-plus"></span> {{ 'document.default.add_new_document' | translate }}
-    </button>
-
-    <button ng-show="checkedFiles().length == 0"
-            class="btn btn-default"
-            ngf-select
-            ngf-change="fileDropped($files, $event)"
-            input-file-multiple="multiple"
-            ngf-multiple="true">
-      {{ 'document.default.add_files' | translate }}
-    </button>
-  </p>
-</div>
-
-<div class="row widgets">
-  <div class="col-md-12" ng-show="documentsWorkflow && documentsWorkflow.length > 0">
-    <div class="well well-3d" style="background-color: #fff4f4;">
-      <h3 class="well-3d-header text-muted">
-        <span class="fas fa-exclamation-triangle text-danger"></span>
-        {{ 'document.default.workflow_document_list' | translate }}
-      </h3>
-
-      <table class="row table table-hover table-documents">
-        <thead>
-        <tr>
-          <th class="col-xs-6">{{ 'document.title' | translate }}</th>
-          <th class="col-xs-3">{{ 'document.current_step_name' | translate }}</th>
-          <th class="col-xs-3">{{ 'document.creation_date' | translate }}</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-click="viewDocument(document.id)" ng-repeat="document in documentsWorkflow">
-          <td>
-            {{ document.title }} ({{ document.file_count }})
-            <div class="tags small">
-              <span class="label label-info" ng-repeat="tag in document.tags" ng-style="{ 'background': tag.color }">
-                {{ tag.name }}
-              </span>
+      <div
+        class="row upload-zone"
+        ngf-drop="fileDropped($files)"
+        ngf-drag-over-class="'bg-success'"
+        ngf-multiple="true"
+        ngf-allow-dir="false"
+      >
+        <div
+          class="col-xs-6 col-sm-4 col-md-3 col-lg-2 text-center"
+          ng-repeat="file in files"
+        >
+          <div
+            class="thumbnail"
+            ng-class="{ 'thumbnail-checked': file.checked }"
+            ng-if="file.id"
+          >
+            <a class="file-thumbnail" ng-click="openFile(file)">
+              <img
+                ng-src="../api/file/{{ file.id }}/data?size=thumb"
+                uib-tooltip="{{ file.mimetype }} | {{ file.size | filesize }}"
+                tooltip-placement="top"
+              />
+            </a>
+            <div class="file-info">
+              <div class="v-align">
+                <button class="btn btn-danger" ng-click="deleteFile($event, file)">
+                  <span class="fas fa-trash"></span>
+                </button>
+              </div>
+              <div class="v-align file-name" ng-if="file.name">{{ file.name }}</div>
+              <div class="v-align">
+                <input type="checkbox" ng-model="file.checked" />
+              </div>
             </div>
-          </td>
-          <td>{{ document.current_step_name }}</td>
-          <td>
-            <div class="text-muted small">{{ document.create_date | timeAgo: dateFormat }}</div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+          </div>
+
+          <div class="thumbnail" ng-if="!file.id">
+            <p class="text-center lead">{{ file.status }}</p>
+            <div class="caption">
+              <uib-progressbar
+                value="file.progress"
+                class="progress-info active"
+              ></uib-progressbar>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-center well-lg text-muted" ng-if="files.length == 0">
+          <span class="fas fa-arrows-alt"></span>
+          {{ 'document.default.drop_zone' | translate }}
+        </p>
+      </div>
+
+      <p class="text-center">
+        <button
+          ng-show="checkedFiles().length > 0"
+          class="btn gov-btn-primary"
+          ng-click="addDocument()"
+        >
+          <span class="fas fa-plus"></span> {{ 'document.default.add_new_document' |
+          translate }}
+        </button>
+
+        <button
+          ng-show="checkedFiles().length == 0"
+          class="btn gov-btn-outline"
+          ngf-select
+          ngf-change="fileDropped($files, $event)"
+          input-file-multiple="multiple"
+          ngf-multiple="true"
+        >
+          {{ 'document.default.add_files' | translate }}
+        </button>
+      </p>
+    </div>
+
+    <div
+      class="col-md-12"
+      ng-show="documentsWorkflow && documentsWorkflow.length > 0"
+    >
+      <div class="gov-card" style="border-color: #dc143c">
+        <div class="gov-card-header">
+          <span class="fas fa-exclamation-triangle" style="color: #dc143c"></span>
+          {{ 'document.default.workflow_document_list' | translate }}
+        </div>
+
+        <table class="row table table-hover table-documents">
+          <thead>
+            <tr>
+              <th class="col-xs-6">{{ 'document.title' | translate }}</th>
+              <th class="col-xs-3">
+                {{ 'document.current_step_name' | translate }}
+              </th>
+              <th class="col-xs-3">{{ 'document.creation_date' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              ng-click="viewDocument(document.id)"
+              ng-repeat="document in documentsWorkflow"
+            >
+              <td>
+                {{ document.title }} ({{ document.file_count }})
+                <div class="tags small">
+                  <span
+                    class="label label-info"
+                    ng-repeat="tag in document.tags"
+                    ng-style="{ 'background': tag.color }"
+                  >
+                    {{ tag.name }}
+                  </span>
+                </div>
+              </td>
+              <td>{{ document.current_step_name }}</td>
+              <td>
+                <div class="text-muted small">
+                  {{ document.create_date | timeAgo: dateFormat }}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mb-19 text-center" ng-show="!logs">
+      <span class="fas fa-circle-notch fa-spin"></span>
+    </div>
+
+    <div class="gov-card" ng-show="logs.length > 0">
+      <div class="gov-card-header">
+        <span class="fas fa-history"></span>
+        {{ 'document.default.latest_activity' | translate }}
+      </div>
+      <audit-log logs="logs" />
     </div>
   </div>
-</div>
 
-<div class="mb-19 text-center" ng-show="!logs">
-  <span class="fas fa-circle-notch fa-spin"></span>
-</div>
+  <div class="col-md-4">
+    <div class="gov-announcement">
+      <h4 class="gov-announcement-header">
+        <span class="fas fa-bullhorn"></span>系统公告
+      </h4>
+      <ul class="gov-announcement-list">
+        <li>
+          <a href="#">
+            <span>关于开展电子文档安全检查的通知</span>
+            <span class="gov-announcement-date">2026-07-08</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span>系统升级维护公告（7月10日）</span>
+            <span class="gov-announcement-date">2026-07-05</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span>新版电子文档管理规范发布</span>
+            <span class="gov-announcement-date">2026-06-28</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span>关于加强文档访问权限管理的通知</span>
+            <span class="gov-announcement-date">2026-06-20</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span>系统操作指南更新公告</span>
+            <span class="gov-announcement-date">2026-06-15</span>
+          </a>
+        </li>
+      </ul>
+    </div>
 
-<div class="well well-3d"  ng-show="logs.length > 0">
-  <h3 class="well-3d-header text-muted">
-    {{ 'document.default.latest_activity' | translate }}
-  </h3>
-  <audit-log logs="logs" />
+    <div class="gov-card" style="margin-top: 20px">
+      <div class="gov-card-header">
+        <span class="fas fa-info-circle"></span>系统信息
+      </div>
+      <div style="font-size: 13px; color: #666;">
+        <p><strong>系统版本：</strong>v{{ app.current_version }}</p>
+        <p><strong>运行状态：</strong><span style="color: #5cb85c;">正常</span></p>
+        <p><strong>最后更新：</strong>2026-07-09</p>
+        <p><strong>技术支持：</strong>信息中心</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div ui-view="file"></div>
 
-<a href class="feedback" ng-if="userInfo.base_functions.indexOf('ADMIN') != -1" ng-click="openFeedback()">
+<a
+  href
+  class="feedback"
+  ng-if="userInfo.base_functions.indexOf('ADMIN') != -1"
+  ng-click="openFeedback()"
+>
   {{ 'document.default.feedback' | translate }}
 </a>

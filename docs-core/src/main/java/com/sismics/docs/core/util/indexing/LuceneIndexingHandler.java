@@ -254,9 +254,10 @@ public class LuceneIndexingHandler implements IndexingHandler {
         List<String> criteriaList = new ArrayList<>();
         Map<String, String> documentSearchMap = Maps.newHashMap();
 
-        StringBuilder sb = new StringBuilder("select distinct d.DOC_ID_C c0, d.DOC_TITLE_C c1, d.DOC_DESCRIPTION_C c2, d.DOC_CREATEDATE_D c3, d.DOC_LANGUAGE_C c4, d.DOC_IDFILE_C, ");
-        sb.append(" s.count c5, ");
-        sb.append(" rs2.RTP_ID_C c7, rs2.RTP_NAME_C, d.DOC_UPDATEDATE_D c8 ");
+        StringBuilder sb = new StringBuilder("select distinct d.DOC_ID_C c0, d.DOC_TITLE_C c1, d.DOC_DESCRIPTION_C c2, d.DOC_CREATEDATE_D c3, d.DOC_LANGUAGE_C c4, d.DOC_IDFILE_C c5, ");
+        sb.append(" d.DOC_IDCLASSIFICATION_C c6, d.DOC_SECRECYLEVEL_C c7, d.DOC_URGENCY_C c8, d.DOC_DOCNO_C c9, d.DOC_FROMUNIT_C c10, d.DOC_IDHANDLERDEPT_C c11, d.DOC_IDHANDLERUSER_C c12, d.DOC_DOCDATE_D c13, d.DOC_RETENTION_C c14, d.DOC_ARCHIVENO_C c15, d.DOC_STATUS_C c16, ");
+        sb.append(" s.count c17, ");
+        sb.append(" rs2.RTP_ID_C c18, rs2.RTP_NAME_C c19, d.DOC_UPDATEDATE_D c20 ");
         sb.append(" from T_DOCUMENT d ");
         sb.append(" left join (SELECT count(s.SHA_ID_C) count, ac.ACL_SOURCEID_C " +
                 "   FROM T_SHARE s, T_ACL ac " +
@@ -352,6 +353,22 @@ public class LuceneIndexingHandler implements IndexingHandler {
         if (criteria.getActiveRoute() != null && criteria.getActiveRoute()) {
             criteriaList.add("rs2.RTP_ID_C is not null");
         }
+        if (criteria.getSecrecyLevel() != null) {
+            criteriaList.add("d.DOC_SECRECYLEVEL_C = :secrecyLevel");
+            parameterMap.put("secrecyLevel", criteria.getSecrecyLevel());
+        }
+        if (criteria.getStatus() != null) {
+            criteriaList.add("d.DOC_STATUS_C = :status");
+            parameterMap.put("status", criteria.getStatus());
+        }
+        if (criteria.getClassificationId() != null) {
+            criteriaList.add("d.DOC_IDCLASSIFICATION_C = :classificationId");
+            parameterMap.put("classificationId", criteria.getClassificationId());
+        }
+        if (criteria.getUserClearanceLevel() != null) {
+            criteriaList.add("(case d.DOC_SECRECYLEVEL_C when 'PUBLIC' then 1 when 'INTERNAL' then 2 when 'SECRET' then 3 when 'CONFIDENTIAL' then 4 when 'TOP_SECRET' then 5 else 2 end) <= :clearanceLevel");
+            parameterMap.put("clearanceLevel", criteria.getUserClearanceLevel());
+        }
 
         criteriaList.add("d.DOC_DELETEDATE_D is null");
 
@@ -373,6 +390,20 @@ public class LuceneIndexingHandler implements IndexingHandler {
             documentDto.setCreateTimestamp(((Timestamp) o[i++]).getTime());
             documentDto.setLanguage((String) o[i++]);
             documentDto.setFileId((String) o[i++]);
+            documentDto.setClassificationId((String) o[i++]);
+            documentDto.setSecrecyLevel((String) o[i++]);
+            documentDto.setUrgency((String) o[i++]);
+            documentDto.setDocNo((String) o[i++]);
+            documentDto.setFromUnit((String) o[i++]);
+            documentDto.setHandlerDeptId((String) o[i++]);
+            documentDto.setHandlerUserId((String) o[i++]);
+            Timestamp docDate = (Timestamp) o[i++];
+            if (docDate != null) {
+                documentDto.setDocTimestamp(docDate.getTime());
+            }
+            documentDto.setRetention((String) o[i++]);
+            documentDto.setArchiveNo((String) o[i++]);
+            documentDto.setStatus((String) o[i++]);
             Number shareCount = (Number) o[i++];
             documentDto.setShared(shareCount != null && shareCount.intValue() > 0);
             documentDto.setActiveRoute(o[i++] != null);

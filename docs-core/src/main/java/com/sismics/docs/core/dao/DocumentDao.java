@@ -88,6 +88,7 @@ public class DocumentDao {
 
         EntityManager em = ThreadLocalContext.get().getEntityManager();
         StringBuilder sb = new StringBuilder("select distinct d.DOC_ID_C, d.DOC_TITLE_C, d.DOC_DESCRIPTION_C, d.DOC_SUBJECT_C, d.DOC_IDENTIFIER_C, d.DOC_PUBLISHER_C, d.DOC_FORMAT_C, d.DOC_SOURCE_C, d.DOC_TYPE_C, d.DOC_COVERAGE_C, d.DOC_RIGHTS_C, d.DOC_CREATEDATE_D, d.DOC_UPDATEDATE_D, d.DOC_LANGUAGE_C, d.DOC_IDFILE_C,");
+        sb.append(" d.DOC_IDCLASSIFICATION_C, d.DOC_SECRECYLEVEL_C, d.DOC_URGENCY_C, d.DOC_DOCNO_C, d.DOC_FROMUNIT_C, d.DOC_IDHANDLERDEPT_C, d.DOC_IDHANDLERUSER_C, d.DOC_DOCDATE_D, d.DOC_RETENTION_C, d.DOC_ARCHIVENO_C, d.DOC_STATUS_C, ");
         sb.append(" (select count(s.SHA_ID_C) from T_SHARE s, T_ACL ac where ac.ACL_SOURCEID_C = d.DOC_ID_C and ac.ACL_TARGETID_C = s.SHA_ID_C and ac.ACL_DELETEDATE_D is null and s.SHA_DELETEDATE_D is null) shareCount, ");
         sb.append(" (select count(f.FIL_ID_C) from T_FILE f where f.FIL_DELETEDATE_D is null and f.FIL_IDDOC_C = d.DOC_ID_C) fileCount, ");
         sb.append(" u.USE_USERNAME_C ");
@@ -122,6 +123,20 @@ public class DocumentDao {
         documentDto.setUpdateTimestamp(((Timestamp) o[i++]).getTime());
         documentDto.setLanguage((String) o[i++]);
         documentDto.setFileId((String) o[i++]);
+        documentDto.setClassificationId((String) o[i++]);
+        documentDto.setSecrecyLevel((String) o[i++]);
+        documentDto.setUrgency((String) o[i++]);
+        documentDto.setDocNo((String) o[i++]);
+        documentDto.setFromUnit((String) o[i++]);
+        documentDto.setHandlerDeptId((String) o[i++]);
+        documentDto.setHandlerUserId((String) o[i++]);
+        Timestamp docDate = (Timestamp) o[i++];
+        if (docDate != null) {
+            documentDto.setDocTimestamp(docDate.getTime());
+        }
+        documentDto.setRetention((String) o[i++]);
+        documentDto.setArchiveNo((String) o[i++]);
+        documentDto.setStatus((String) o[i++]);
         documentDto.setShared(((Number) o[i++]).intValue() > 0);
         documentDto.setFileCount(((Number) o[i++]).intValue());
         documentDto.setCreator((String) o[i]);
@@ -217,6 +232,17 @@ public class DocumentDao {
         documentDb.setCreateDate(document.getCreateDate());
         documentDb.setLanguage(document.getLanguage());
         documentDb.setFileId(document.getFileId());
+        documentDb.setClassificationId(document.getClassificationId());
+        documentDb.setSecrecyLevel(document.getSecrecyLevel());
+        documentDb.setUrgency(document.getUrgency());
+        documentDb.setDocNo(document.getDocNo());
+        documentDb.setFromUnit(document.getFromUnit());
+        documentDb.setHandlerDeptId(document.getHandlerDeptId());
+        documentDb.setHandlerUserId(document.getHandlerUserId());
+        documentDb.setDocDate(document.getDocDate());
+        documentDb.setRetention(document.getRetention());
+        documentDb.setArchiveNo(document.getArchiveNo());
+        documentDb.setStatus(document.getStatus());
         documentDb.setUpdateDate(new Date());
         
         // Create audit log

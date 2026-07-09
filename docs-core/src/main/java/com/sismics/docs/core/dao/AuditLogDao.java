@@ -1,101 +1,119 @@
 package com.sismics.docs.core.dao;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import com.sismics.docs.core.constant.AuditLogType;
-import com.sismics.docs.core.dao.criteria.AuditLogCriteria;
 import com.sismics.docs.core.dao.dto.AuditLogDto;
 import com.sismics.docs.core.model.jpa.AuditLog;
-import com.sismics.docs.core.util.jpa.PaginatedList;
-import com.sismics.docs.core.util.jpa.PaginatedLists;
-import com.sismics.docs.core.util.jpa.QueryParam;
-import com.sismics.docs.core.util.jpa.SortCriteria;
 import com.sismics.util.context.ThreadLocalContext;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import java.sql.Timestamp;
 import java.util.*;
 
 /**
  * Audit log DAO.
- * 
- * @author bgamard
  */
 public class AuditLogDao {
+
     /**
-     * Creates a new audit log.
-     * 
-     * @param auditLog Audit log
-     * @return New ID
+     * Create an audit log entry.
      */
     public String create(AuditLog auditLog) {
-        // Create the UUID
-        auditLog.setId(UUID.randomUUID().toString());
-        
-        // Create the audit log
         EntityManager em = ThreadLocalContext.get().getEntityManager();
-        auditLog.setCreateDate(new Date());
         em.persist(auditLog);
-        
         return auditLog.getId();
     }
-    
+
     /**
-     * Searches audit logs by criteria.
-     * 
-     * @param paginatedList List of audit logs (updated by side effects)
-     * @param criteria Search criteria
-     * @param sortCriteria Sort criteria
+     * Find audit logs with filtering support.
      */
-    public void findByCriteria(PaginatedList<AuditLogDto> paginatedList, AuditLogCriteria criteria, SortCriteria sortCriteria) {
-        Map<String, Object> parameterMap = new HashMap<>();
-        
-        StringBuilder baseQuery = new StringBuilder("select l.LOG_ID_C c0, l.LOG_CREATEDATE_D c1, u.USE_USERNAME_C c2, l.LOG_IDENTITY_C c3, l.LOG_CLASSENTITY_C c4, l.LOG_TYPE_C c5, l.LOG_MESSAGE_C c6 from T_AUDIT_LOG l ");
-        baseQuery.append(" join T_USER u on l.LOG_IDUSER_C = u.USE_ID_C ");
-        List<String> queries = Lists.newArrayList();
-        
-        // Adds search criteria
-        if (criteria.getDocumentId() != null) {
-            // ACL on document is not checked here, rights have been checked before
-            queries.add(baseQuery + " where l.LOG_IDENTITY_C = :documentId ");
-            queries.add(baseQuery + " where l.LOG_IDENTITY_C in (select f.FIL_ID_C from T_FILE f where f.FIL_IDDOC_C = :documentId) ");
-            queries.add(baseQuery + " where l.LOG_IDENTITY_C in (select c.COM_ID_C from T_COMMENT c where c.COM_IDDOC_C = :documentId) ");
-            queries.add(baseQuery + " where l.LOG_IDENTITY_C in (select a.ACL_ID_C from T_ACL a where a.ACL_SOURCEID_C = :documentId) ");
-            queries.add(baseQuery + " where l.LOG_IDENTITY_C in (select r.RTE_ID_C from T_ROUTE r where r.RTE_IDDOCUMENT_C = :documentId) ");
-            parameterMap.put("documentId", criteria.getDocumentId());
+    public List<AuditLogDto> findAll(String action, String targetId, String userId,
+                                      Date startDate, Date endDate, int offset, int limit) {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        StringBuilder sb = new StringBuilder("select l.LOG_ID_C c0, l.LOG_USERID_C c1, l.LOG_USERNAME_C c2, ");
+        sb.append("l.LOG_ACTION_C c3, l.LOG_TARGETID_C c4, l.LOG_DETAIL_C c5, l.LOG_CLIENTIP_C c6, l.LOG_CREATEDATE_D c7 ");
+        sb.append("from T_AUDIT_LOG l where 1=1");
+
+        Map<String, Object> params = new HashMap<>();
+
+        if (action != null) {
+            sb.append(" and l.LOG_ACTION_C = :action");
+            params.put("action", action);
         }
-        
-        if (criteria.getUserId() != null) {
-            if (criteria.isAdmin()) {
-                // For admin users, display all logs except ACL logs
-                queries.add(baseQuery + " where l.LOG_CLASSENTITY_C != 'Acl' ");
-            } else {
-                // Get all logs originating from the user, not necessarly on owned items
-                // Filter out ACL logs
-                queries.add(baseQuery + " where l.LOG_IDUSER_C = :userId and l.LOG_CLASSENTITY_C != 'Acl' ");
-                parameterMap.put("userId", criteria.getUserId());
-            }
+        if (targetId != null) {
+            sb.append(" and l.LOG_TARGETID_C = :targetId");
+            params.put("targetId", targetId);
         }
-        
-        // Perform the search
-        QueryParam queryParam = new QueryParam(Joiner.on(" union ").join(queries), parameterMap);
-        List<Object[]> l = PaginatedLists.executePaginatedQuery(paginatedList, queryParam, sortCriteria);
-        
-        // Assemble results
-        List<AuditLogDto> auditLogDtoList = new ArrayList<>();
-        for (Object[] o : l) {
-            int i = 0;
-            AuditLogDto auditLogDto = new AuditLogDto();
-            auditLogDto.setId((String) o[i++]);
-            auditLogDto.setCreateTimestamp(((Timestamp) o[i++]).getTime());
-            auditLogDto.setUsername((String) o[i++]);
-            auditLogDto.setEntityId((String) o[i++]);
-            auditLogDto.setEntityClass((String) o[i++]);
-            auditLogDto.setType(AuditLogType.valueOf((String) o[i++]));
-            auditLogDto.setMessage((String) o[i++]);
-            auditLogDtoList.add(auditLogDto);
+        if (userId != null) {
+            sb.append(" and l.LOG_USERID_C = :userId");
+            params.put("userId", userId);
+        }
+        if (startDate != null) {
+            sb.append(" and l.LOG_CREATEDATE_D >= :startDate");
+            params.put("startDate", startDate);
+        }
+        if (endDate != null) {
+            sb.append(" and l.LOG_CREATEDATE_D <= :endDate");
+            params.put("endDate", endDate);
         }
 
-        paginatedList.setResultList(auditLogDtoList);
+        sb.append(" order by l.LOG_CREATEDATE_D desc");
+
+        Query q = em.createNativeQuery(sb.toString());
+        params.forEach(q::setParameter);
+        q.setFirstResult(offset);
+        q.setMaxResults(limit);
+
+        List<AuditLogDto> dtoList = new ArrayList<>();
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = q.getResultList();
+        for (Object[] o : results) {
+            AuditLogDto dto = new AuditLogDto();
+            dto.setId((String) o[0]);
+            dto.setUserId((String) o[1]);
+            dto.setUsername((String) o[2]);
+            dto.setAction((String) o[3]);
+            dto.setTargetId((String) o[4]);
+            dto.setDetail((String) o[5]);
+            dto.setClientIp((String) o[6]);
+            dto.setCreateTimestamp(((Timestamp) o[7]).getTime());
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+
+    /**
+     * Count audit logs with filtering support.
+     */
+    public long count(String action, String targetId, String userId,
+                      Date startDate, Date endDate) {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        StringBuilder sb = new StringBuilder("select count(l.LOG_ID_C) from T_AUDIT_LOG l where 1=1");
+
+        Map<String, Object> params = new HashMap<>();
+
+        if (action != null) {
+            sb.append(" and l.LOG_ACTION_C = :action");
+            params.put("action", action);
+        }
+        if (targetId != null) {
+            sb.append(" and l.LOG_TARGETID_C = :targetId");
+            params.put("targetId", targetId);
+        }
+        if (userId != null) {
+            sb.append(" and l.LOG_USERID_C = :userId");
+            params.put("userId", userId);
+        }
+        if (startDate != null) {
+            sb.append(" and l.LOG_CREATEDATE_D >= :startDate");
+            params.put("startDate", startDate);
+        }
+        if (endDate != null) {
+            sb.append(" and l.LOG_CREATEDATE_D <= :endDate");
+            params.put("endDate", endDate);
+        }
+
+        Query q = em.createNativeQuery(sb.toString());
+        params.forEach(q::setParameter);
+        return ((Number) q.getSingleResult()).longValue();
     }
 }

@@ -88,6 +88,26 @@ public class DocumentCriteria {
      */
     private List<String> titleList = new ArrayList<>();
 
+    /**
+     * Secrecy level.
+     */
+    private String secrecyLevel;
+
+    /**
+     * Document status.
+     */
+    private String status;
+
+    /**
+     * Document classification ID.
+     */
+    private String classificationId;
+
+    /**
+     * User secrecy clearance level for filtering.
+     */
+    private Integer userClearanceLevel;
+
     public List<String> getTargetIdList() {
         return targetIdList;
     }
@@ -194,5 +214,37 @@ public class DocumentCriteria {
 
     public List<String> getTitleList() {
         return titleList;
+    }
+
+    public String getSecrecyLevel() {
+        return secrecyLevel;
+    }
+
+    public void setSecrecyLevel(String secrecyLevel) {
+        this.secrecyLevel = secrecyLevel;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getClassificationId() {
+        return classificationId;
+    }
+
+    public void setClassificationId(String classificationId) {
+        this.classificationId = classificationId;
+    }
+
+    public Integer getUserClearanceLevel() {
+        return userClearanceLevel;
+    }
+
+    public void setUserClearanceLevel(Integer userClearanceLevel) {
+        this.userClearanceLevel = userClearanceLevel;
     }
 }

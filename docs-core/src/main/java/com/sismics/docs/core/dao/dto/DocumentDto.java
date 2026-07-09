@@ -111,6 +111,61 @@ public class DocumentDto {
      */
     private String highlight;
 
+    /**
+     * Document classification ID.
+     */
+    private String classificationId;
+
+    /**
+     * Secrecy level.
+     */
+    private String secrecyLevel;
+
+    /**
+     * Urgency level.
+     */
+    private String urgency;
+
+    /**
+     * Document number.
+     */
+    private String docNo;
+
+    /**
+     * From unit.
+     */
+    private String fromUnit;
+
+    /**
+     * Handler department ID.
+     */
+    private String handlerDeptId;
+
+    /**
+     * Handler user ID.
+     */
+    private String handlerUserId;
+
+    /**
+     * Document date.
+     */
+    private Long docTimestamp;
+
+    /**
+     * Retention period.
+     */
+    private String retention;
+
+    /**
+     * Archive number.
+     */
+    private String archiveNo;
+
+    /**
+     * Document status.
+     */
+    private String status;
+
     public String getId() {
         return id;
     }
@@ -280,5 +335,93 @@ public class DocumentDto {
     public DocumentDto setHighlight(String highlight) {
         this.highlight = highlight;
         return this;
+    }
+
+    public String getClassificationId() {
+        return classificationId;
+    }
+
+    public void setClassificationId(String classificationId) {
+        this.classificationId = classificationId;
+    }
+
+    public String getSecrecyLevel() {
+        return secrecyLevel;
+    }
+
+    public void setSecrecyLevel(String secrecyLevel) {
+        this.secrecyLevel = secrecyLevel;
+    }
+
+    public String getUrgency() {
+        return urgency;
+    }
+
+    public void setUrgency(String urgency) {
+        this.urgency = urgency;
+    }
+
+    public String getDocNo() {
+        return docNo;
+    }
+
+    public void setDocNo(String docNo) {
+        this.docNo = docNo;
+    }
+
+    public String getFromUnit() {
+        return fromUnit;
+    }
+
+    public void setFromUnit(String fromUnit) {
+        this.fromUnit = fromUnit;
+    }
+
+    public String getHandlerDeptId() {
+        return handlerDeptId;
+    }
+
+    public void setHandlerDeptId(String handlerDeptId) {
+        this.handlerDeptId = handlerDeptId;
+    }
+
+    public String getHandlerUserId() {
+        return handlerUserId;
+    }
+
+    public void setHandlerUserId(String handlerUserId) {
+        this.handlerUserId = handlerUserId;
+    }
+
+    public Long getDocTimestamp() {
+        return docTimestamp;
+    }
+
+    public void setDocTimestamp(Long docTimestamp) {
+        this.docTimestamp = docTimestamp;
+    }
+
+    public String getRetention() {
+        return retention;
+    }
+
+    public void setRetention(String retention) {
+        this.retention = retention;
+    }
+
+    public String getArchiveNo() {
+        return archiveNo;
+    }
+
+    public void setArchiveNo(String archiveNo) {
+        this.archiveNo = archiveNo;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

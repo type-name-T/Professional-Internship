@@ -1,88 +1,297 @@
 <style>
-  /* No navbar in login screen */
+  body {
+    background: linear-gradient(
+      135deg,
+      #6b0000 0%,
+      #8b0000 30%,
+      #a52a2a 70%,
+      #8b0000 100%
+    );
+    min-height: 100vh;
+  }
+
   .navbar {
     display: none;
   }
 
-  /* Absolute positionned footer on top of the login background */
   .footer {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     border: none;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px 20px;
+    z-index: 100;
   }
 
-  @media screen and (min-width: 768px) {
-    .footer {
-      width: 50%;
+  .login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .login-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(139, 0, 0, 0.2);
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #daa520, #ffd700, #daa520);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .login-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #daa520, transparent);
+  }
+
+  .login-header {
+    text-align: center;
+    margin-bottom: 35px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .login-logo {
+    width: 70px;
+    height: 70px;
+    background: rgba(139, 0, 0, 0.08);
+    border: 3px solid #daa520;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+
+    .fas {
+      font-size: 32px;
+      color: #8b0000;
     }
   }
 
-  /* Smaller links everywhere on login */
-  a {
-    font-size: 90%;
-    color: #666;
+  .login-title {
+    font-family: 'SimHei', 'Microsoft YaHei', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #8b0000;
+    letter-spacing: 6px;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .login-subtitle {
+    font-family: 'SimHei', 'Microsoft YaHei', sans-serif;
+    font-size: 13px;
+    color: #888;
+    letter-spacing: 2px;
+    margin-top: 8px;
+  }
+
+  .login-form {
+    margin-top: 20px;
+  }
+
+  .login-form .form-group {
+    margin-bottom: 20px;
+  }
+
+  .login-form .form-control {
+    height: 44px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    padding: 0 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: #fafafa;
+
+    &:focus {
+      border-color: #8b0000;
+      box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+      background: #ffffff;
+    }
+  }
+
+  .login-form .checkbox {
+    margin-bottom: 25px;
+
+    label {
+      font-weight: normal;
+      color: #666;
+      font-size: 13px;
+    }
+  }
+
+  .login-btn {
+    width: 100%;
+    height: 46px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    letter-spacing: 4px;
+  }
+
+  .login-btn-primary {
+    background: linear-gradient(135deg, #8b0000, #a52a2a);
+    border: 2px solid #daa520;
+    color: #daa520;
+
+    &:hover {
+      background: linear-gradient(135deg, #a52a2a, #dc143c);
+      border-color: #ffd700;
+      color: #ffd700;
+      box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+    }
+  }
+
+  .login-btn-default {
+    background: #fff5f5;
+    border: 1px solid #8b0000;
+    color: #8b0000;
+    margin-top: 15px;
+
+    &:hover {
+      background: #8b0000;
+      border-color: #daa520;
+      color: #daa520;
+    }
+  }
+
+  .login-links {
+    text-align: center;
+    margin-top: 20px;
+
+    a {
+      font-size: 13px;
+      color: #8b0000;
+
+      &:hover {
+        color: #a52a2a;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .login-version {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px dashed #eee;
+
+    span {
+      font-size: 11px;
+      color: #999;
+    }
   }
 </style>
-<div class="row vertical-center">
-  <div class="col-sm-6 col-xs-12 login-box">
-    <div class="row">
-      <div class="col-lg-offset-4 col-lg-4 col-xs-offset-1 col-xs-10">
-        <img src="img/title.png" class="img-responsive" />
 
-        <form>
-          <div class="form-group">
-            <label class="sr-only" for="inputUsername">{{ 'login.username' | translate }}</label>
-            <input class="form-control" type="text" id="inputUsername" name="username"
-                   ng-attr-placeholder="{{ 'login.username' | translate }}" ng-model="user.username" />
-          </div>
-
-          <div class="form-group">
-            <label class="sr-only" for="inputPassword">{{ 'login.password' | translate }}</label>
-            <input class="form-control" type="password" id="inputPassword" name="password"
-                   ng-attr-placeholder="{{ 'login.password' | translate }}" ng-model="user.password" />
-          </div>
-
-          <span class="help-block" ng-if="codeRequired">
-            {{ 'login.validation_code_required' | translate }}
-            <span class="fas fa-question-circle" title="{{ 'login.validation_code_title' | translate }}"></span>
-          </span>
-          <div class="form-group" ng-if="codeRequired">
-            <label class="sr-only" for="inputCode">{{ 'login.validation_code' | translate }}</label>
-            <input class="form-control" type="text" id="inputCode" name="code"
-                   ng-attr-placeholder="{{ 'login.validation_code' | translate }}" ng-model="user.code" />
-          </div>
-
-          <div class="checkbox text-muted">
-            <label>
-              <input type="checkbox" ng-model="user.remember" name="remember" /> {{ 'login.remember_me' | translate }}
-            </label>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <button type="submit" class="btn btn-primary" ng-click="login()">
-                <span class="fas fa-check"></span> {{ 'login.submit' | translate }}
-              </button>
-            </div>
-
-            <div class="col-md-6 text-right btn-password-lost">
-              <div class="well-sm">
-                <a href ng-click="openPasswordLost()">{{ 'login.password_lost_btn' | translate }}</a>
-              </div>
-            </div>
-          </div>
-
-          <p class="text-center" ng-if="app.guest_login">&nbsp;</p>
-
-          <button type="submit" class="btn btn-default btn-block" ng-if="app.guest_login" ng-click="loginAsGuest()">
-            <span class="fas fa-user"></span> {{ 'login.login_as_guest' | translate }}
-          </button>
-        </form>
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">
+        <span class="fas fa-archive"></span>
       </div>
+      <h1 class="login-title">机关事业单位电子文档管理系统</h1>
+      <p class="login-subtitle">电子文档综合管理平台</p>
+    </div>
+
+    <form class="login-form">
+      <div class="form-group">
+        <input
+          class="form-control"
+          type="text"
+          id="inputUsername"
+          name="username"
+          ng-attr-placeholder="{{ 'login.username' | translate }}"
+          ng-model="user.username"
+        />
+      </div>
+
+      <div class="form-group">
+        <input
+          class="form-control"
+          type="password"
+          id="inputPassword"
+          name="password"
+          ng-attr-placeholder="{{ 'login.password' | translate }}"
+          ng-model="user.password"
+        />
+      </div>
+
+      <span class="help-block" ng-if="codeRequired">
+        {{ 'login.validation_code_required' | translate }}
+        <span
+          class="fas fa-question-circle"
+          title="{{ 'login.validation_code_title' | translate }}"
+        ></span>
+      </span>
+      <div class="form-group" ng-if="codeRequired">
+        <input
+          class="form-control"
+          type="text"
+          id="inputCode"
+          name="code"
+          ng-attr-placeholder="{{ 'login.validation_code' | translate }}"
+          ng-model="user.code"
+        />
+      </div>
+
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" ng-model="user.remember" name="remember" />
+          {{ 'login.remember_me' | translate }}
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        class="btn login-btn login-btn-primary"
+        ng-click="login()"
+      >
+        <span class="fas fa-sign-in-alt"></span> {{ 'login.submit' | translate
+        }}
+      </button>
+
+      <div class="login-links">
+        <a href ng-click="openPasswordLost()"
+          >{{ 'login.password_lost_btn' | translate }}</a
+        >
+      </div>
+
+      <button
+        type="submit"
+        class="btn login-btn login-btn-default"
+        ng-if="app.guest_login"
+        ng-click="loginAsGuest()"
+      >
+        <span class="fas fa-user"></span> {{ 'login.login_as_guest' | translate
+        }}
+      </button>
+    </form>
+
+    <div class="login-version">
+      <span>机关事业单位电子文档管理系统 v{{ app.current_version }}</span>
     </div>
   </div>
-
-  <div class="login-img-container col-sm-6 hidden-xs"></div>
 </div>

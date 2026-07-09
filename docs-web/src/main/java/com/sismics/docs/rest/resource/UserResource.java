@@ -80,12 +80,15 @@ public class UserResource extends BaseResource {
         @FormParam("username") String username,
         @FormParam("password") String password,
         @FormParam("email") String email,
-        @FormParam("storage_quota") String storageQuotaStr) {
+        @FormParam("storage_quota") String storageQuotaStr,
+        @FormParam("admin_type") String adminType,
+        @FormParam("secrecy_level") String secrecyLevel,
+        @FormParam("classifier") Boolean classifier) {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
         checkBaseFunction(BaseFunction.ADMIN);
-        
+
         // Validate the input data
         username = ValidationUtil.validateLength(username, "username", 3, 50);
         ValidationUtil.validateUsername(username, "username");
@@ -93,7 +96,9 @@ public class UserResource extends BaseResource {
         email = ValidationUtil.validateLength(email, "email", 1, 100);
         Long storageQuota = ValidationUtil.validateLong(storageQuotaStr, "storage_quota");
         ValidationUtil.validateEmail(email, "email");
-        
+        adminType = ValidationUtil.validateLength(adminType, "admin_type", 0, 20, true);
+        secrecyLevel = ValidationUtil.validateLength(secrecyLevel, "secrecy_level", 0, 20, true);
+
         // Create the user
         User user = new User();
         user.setRoleId(Constants.DEFAULT_USER_ROLE);
@@ -102,6 +107,9 @@ public class UserResource extends BaseResource {
         user.setEmail(email);
         user.setStorageQuota(storageQuota);
         user.setOnboarding(true);
+        user.setAdminType(adminType != null ? adminType : "NON_ADMIN");
+        user.setSecrecyLevel(secrecyLevel != null ? secrecyLevel : "UNCLASSIFIED");
+        user.setClassifier(classifier != null ? classifier : false);
 
         // Create the user
         UserDao userDao = new UserDao();
@@ -142,20 +150,25 @@ public class UserResource extends BaseResource {
     @POST
     public Response update(
         @FormParam("password") String password,
-        @FormParam("email") String email) {
+        @FormParam("email") String email,
+        @FormParam("secrecy_level") String secrecyLevel) {
         if (!authenticate() || principal.isGuest()) {
             throw new ForbiddenClientException();
         }
-        
+
         // Validate the input data
         password = ValidationUtil.validateLength(password, "password", 8, 50, true);
         email = ValidationUtil.validateLength(email, "email", 1, 100, true);
-        
+        secrecyLevel = ValidationUtil.validateLength(secrecyLevel, "secrecy_level", 0, 20, true);
+
         // Update the user
         UserDao userDao = new UserDao();
         User user = userDao.getActiveByUsername(principal.getName());
         if (email != null) {
             user.setEmail(email);
+        }
+        if (secrecyLevel != null) {
+            user.setSecrecyLevel(secrecyLevel);
         }
         user = userDao.update(user, principal.getId());
         
@@ -201,16 +214,21 @@ public class UserResource extends BaseResource {
         @FormParam("password") String password,
         @FormParam("email") String email,
         @FormParam("storage_quota") String storageQuotaStr,
-        @FormParam("disabled") Boolean disabled) {
+        @FormParam("disabled") Boolean disabled,
+        @FormParam("admin_type") String adminType,
+        @FormParam("secrecy_level") String secrecyLevel,
+        @FormParam("classifier") Boolean classifier) {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
         checkBaseFunction(BaseFunction.ADMIN);
-        
+
         // Validate the input data
         password = ValidationUtil.validateLength(password, "password", 8, 50, true);
         email = ValidationUtil.validateLength(email, "email", 1, 100, true);
-        
+        adminType = ValidationUtil.validateLength(adminType, "admin_type", 0, 20, true);
+        secrecyLevel = ValidationUtil.validateLength(secrecyLevel, "secrecy_level", 0, 20, true);
+
         // Check if the user exists
         UserDao userDao = new UserDao();
         User user = userDao.getActiveByUsername(username);
@@ -225,6 +243,15 @@ public class UserResource extends BaseResource {
         if (StringUtils.isNotBlank(storageQuotaStr)) {
             Long storageQuota = ValidationUtil.validateLong(storageQuotaStr, "storage_quota");
             user.setStorageQuota(storageQuota);
+        }
+        if (adminType != null) {
+            user.setAdminType(adminType);
+        }
+        if (secrecyLevel != null) {
+            user.setSecrecyLevel(secrecyLevel);
+        }
+        if (classifier != null) {
+            user.setClassifier(classifier);
         }
         if (disabled != null) {
             // Cannot disable the admin user or the guest user
@@ -340,7 +367,11 @@ public class UserResource extends BaseResource {
         // Cleanup old session tokens
         authenticationTokenDao.deleteOldSessionToken(user.getId());
 
-        JsonObjectBuilder response = Json.createObjectBuilder();
+        JsonObjectBuilder response = Json.createObjectBuilder()
+                .add("username", user.getUsername())
+                .add("admin_type", JsonUtil.nullable(user.getAdminType()))
+                .add("secrecy_level", JsonUtil.nullable(user.getSecrecyLevel()))
+                .add("classifier", user.isClassifier());
         int maxAge = longLasted ? TokenBasedSecurityFilter.TOKEN_LONG_LIFETIME : -1;
         NewCookie cookie = new NewCookie(TokenBasedSecurityFilter.COOKIE_NAME, token, "/", null, null, maxAge, false);
         return Response.ok().entity(response.build()).cookie(cookie).build();
@@ -607,7 +638,10 @@ public class UserResource extends BaseResource {
                     .add("storage_quota", user.getStorageQuota())
                     .add("storage_current", user.getStorageCurrent())
                     .add("totp_enabled", user.getTotpKey() != null)
-                    .add("onboarding", user.isOnboarding());
+                    .add("onboarding", user.isOnboarding())
+                    .add("admin_type", JsonUtil.nullable(user.getAdminType()))
+                    .add("secrecy_level", JsonUtil.nullable(user.getSecrecyLevel()))
+                    .add("classifier", user.isClassifier());
 
             // Base functions
             JsonArrayBuilder baseFunctions = Json.createArrayBuilder();
@@ -682,7 +716,10 @@ public class UserResource extends BaseResource {
                 .add("totp_enabled", user.getTotpKey() != null)
                 .add("storage_quota", user.getStorageQuota())
                 .add("storage_current", user.getStorageCurrent())
-                .add("disabled", user.getDisableDate() != null);
+                .add("disabled", user.getDisableDate() != null)
+                .add("admin_type", JsonUtil.nullable(user.getAdminType()))
+                .add("secrecy_level", JsonUtil.nullable(user.getSecrecyLevel()))
+                .add("classifier", user.isClassifier());
         return Response.ok().entity(response.build()).build();
     }
 
@@ -747,7 +784,10 @@ public class UserResource extends BaseResource {
                     .add("storage_quota", userDto.getStorageQuota())
                     .add("storage_current", userDto.getStorageCurrent())
                     .add("create_date", userDto.getCreateTimestamp())
-                    .add("disabled", userDto.getDisableTimestamp() != null));
+                    .add("disabled", userDto.getDisableTimestamp() != null)
+                    .add("admin_type", JsonUtil.nullable(userDto.getAdminType()))
+                    .add("secrecy_level", JsonUtil.nullable(userDto.getSecrecyLevel()))
+                    .add("classifier", userDto.isClassifier()));
         }
         
         JsonObjectBuilder response = Json.createObjectBuilder()

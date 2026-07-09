@@ -100,7 +100,73 @@ public class Document implements Loggable {
      */
     @Column(name = "DOC_RIGHTS_C", length = 100)
     private String rights;
-    
+
+    /**
+     * Document classification ID (收文/发文/会议纪要等).
+     */
+    @Column(name = "DOC_IDCLASSIFICATION_C", length = 36)
+    private String classificationId;
+
+    /**
+     * Secrecy level (公开/内部/秘密/机密/绝密).
+     */
+    @Column(name = "DOC_SECRECYLEVEL_C", length = 20)
+    private String secrecyLevel;
+
+    /**
+     * Urgency level (一般/紧急/特急).
+     */
+    @Column(name = "DOC_URGENCY_C", length = 20)
+    private String urgency;
+
+    /**
+     * Document number (发文字号/收文号).
+     */
+    @Column(name = "DOC_DOCNO_C", length = 100)
+    private String docNo;
+
+    /**
+     * From unit (来文单位，收文用).
+     */
+    @Column(name = "DOC_FROMUNIT_C", length = 200)
+    private String fromUnit;
+
+    /**
+     * Handler department ID (承办部门).
+     */
+    @Column(name = "DOC_IDHANDLERDEPT_C", length = 36)
+    private String handlerDeptId;
+
+    /**
+     * Handler user ID (承办人).
+     */
+    @Column(name = "DOC_IDHANDLERUSER_C", length = 36)
+    private String handlerUserId;
+
+    /**
+     * Document date (成文日期).
+     */
+    @Column(name = "DOC_DOCDATE_D")
+    private Date docDate;
+
+    /**
+     * Retention period (保管期限：永久/长期/短期).
+     */
+    @Column(name = "DOC_RETENTION_C", length = 20)
+    private String retention;
+
+    /**
+     * Archive number (归档号).
+     */
+    @Column(name = "DOC_ARCHIVENO_C", length = 100)
+    private String archiveNo;
+
+    /**
+     * Document status (拟稿/审核中/已批准/已签发/已归档/已驳回).
+     */
+    @Column(name = "DOC_STATUS_C", length = 20)
+    private String status;
+
     /**
      * Creation date.
      */
@@ -255,6 +321,105 @@ public class Document implements Loggable {
 
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
+    }
+
+    public String getClassificationId() {
+        return classificationId;
+    }
+
+    public Document setClassificationId(String classificationId) {
+        this.classificationId = classificationId;
+        return this;
+    }
+
+    public String getSecrecyLevel() {
+        return secrecyLevel;
+    }
+
+    public Document setSecrecyLevel(String secrecyLevel) {
+        this.secrecyLevel = secrecyLevel;
+        return this;
+    }
+
+    public String getUrgency() {
+        return urgency;
+    }
+
+    public Document setUrgency(String urgency) {
+        this.urgency = urgency;
+        return this;
+    }
+
+    public String getDocNo() {
+        return docNo;
+    }
+
+    public Document setDocNo(String docNo) {
+        this.docNo = docNo;
+        return this;
+    }
+
+    public String getFromUnit() {
+        return fromUnit;
+    }
+
+    public Document setFromUnit(String fromUnit) {
+        this.fromUnit = fromUnit;
+        return this;
+    }
+
+    public String getHandlerDeptId() {
+        return handlerDeptId;
+    }
+
+    public Document setHandlerDeptId(String handlerDeptId) {
+        this.handlerDeptId = handlerDeptId;
+        return this;
+    }
+
+    public String getHandlerUserId() {
+        return handlerUserId;
+    }
+
+    public Document setHandlerUserId(String handlerUserId) {
+        this.handlerUserId = handlerUserId;
+        return this;
+    }
+
+    public Date getDocDate() {
+        return docDate;
+    }
+
+    public Document setDocDate(Date docDate) {
+        this.docDate = docDate;
+        return this;
+    }
+
+    public String getRetention() {
+        return retention;
+    }
+
+    public Document setRetention(String retention) {
+        this.retention = retention;
+        return this;
+    }
+
+    public String getArchiveNo() {
+        return archiveNo;
+    }
+
+    public Document setArchiveNo(String archiveNo) {
+        this.archiveNo = archiveNo;
+        return this;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Document setStatus(String status) {
+        this.status = status;
+        return this;
     }
 
     @Override

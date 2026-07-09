@@ -1,15 +1,8 @@
 package com.sismics.docs.rest.resource;
 
-import com.google.common.base.Strings;
-import com.sismics.docs.core.constant.PermType;
-import com.sismics.docs.core.dao.AclDao;
 import com.sismics.docs.core.dao.AuditLogDao;
-import com.sismics.docs.core.dao.criteria.AuditLogCriteria;
 import com.sismics.docs.core.dao.dto.AuditLogDto;
-import com.sismics.docs.core.util.SecurityUtil;
-import com.sismics.docs.core.util.jpa.PaginatedList;
-import com.sismics.docs.core.util.jpa.PaginatedLists;
-import com.sismics.docs.core.util.jpa.SortCriteria;
+import com.sismics.docs.rest.annotation.RequireAdminType;
 import com.sismics.rest.exception.ForbiddenClientException;
 import com.sismics.util.JsonUtil;
 
@@ -17,86 +10,86 @@ import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
+import java.util.Date;
+import java.util.List;
+
 /**
  * Audit log REST resources.
- * 
- * @author bgamard
+ * Only accessible by AUDIT_ADMIN or SYSTEM_ADMIN.
  */
 @Path("/auditlog")
 public class AuditLogResource extends BaseResource {
+
     /**
-     * Returns the list of all logs for a document or user.
+     * Returns audit logs with filtering support.
      *
      * @api {get} /auditlog Get audit logs
-     * @apiDescription If no document ID is provided, logs for the current user will be returned.
      * @apiName GetAuditlog
      * @apiGroup Auditlog
-     * @apiParam {String} [document] Document ID
-     * @apiSuccess {String} total Total number of logs
+     * @apiParam {String} [action] Filter by action type
+     * @apiParam {String} [targetId] Filter by target ID
+     * @apiParam {String} [userId] Filter by user ID
+     * @apiParam {Number} [startDate] Start timestamp (ms)
+     * @apiParam {Number} [endDate] End timestamp (ms)
+     * @apiParam {Number} [offset] Offset (default 0)
+     * @apiParam {Number} [limit] Limit (default 20)
+     * @apiSuccess {Number} total Total count
      * @apiSuccess {Object[]} logs List of logs
      * @apiSuccess {String} logs.id ID
      * @apiSuccess {String} logs.username Username
-     * @apiSuccess {String} logs.target Entity ID
-     * @apiSuccess {String="Acl","Comment","Document","File","Group","Tag","User","RouteModel","Route"} logs.class Entity type
-     * @apiSuccess {String="CREATE","UPDATE","DELETE"} logs.type Type
-     * @apiSuccess {String} logs.message Message
+     * @apiSuccess {String} logs.action Action type
+     * @apiSuccess {String} logs.target_id Target ID
+     * @apiSuccess {String} logs.detail Detail
+     * @apiSuccess {String} logs.client_ip Client IP
      * @apiSuccess {Number} logs.create_date Create date (timestamp)
      * @apiError (client) ForbiddenError Access denied
-     * @apiError (client) NotFound Document not found
-     * @apiPermission user
-     * @apiVersion 1.5.0
+     * @apiPermission audit_admin
+     * @apiVersion 1.12.0
      *
      * @return Response
      */
     @GET
-    public Response list(@QueryParam("document") String documentId) {
+    @RequireAdminType({"AUDIT_ADMIN", "SYSTEM_ADMIN"})
+    public Response list(
+            @QueryParam("action") String action,
+            @QueryParam("targetId") String targetId,
+            @QueryParam("userId") String userId,
+            @QueryParam("startDate") Long startDateParam,
+            @QueryParam("endDate") Long endDateParam,
+            @QueryParam("offset") Integer offsetParam,
+            @QueryParam("limit") Integer limitParam) {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
-        
-        // On a document or a user?
-        PaginatedList<AuditLogDto> paginatedList = PaginatedLists.create(20, 0);
-        SortCriteria sortCriteria = new SortCriteria(1, false);
-        AuditLogCriteria criteria = new AuditLogCriteria();
-        if (Strings.isNullOrEmpty(documentId)) {
-            // Search logs for a user
-            criteria.setUserId(principal.getId());
-            criteria.setAdmin(SecurityUtil.skipAclCheck(getTargetIdList(null)));
-        } else {
-            // Check ACL on the document
-            AclDao aclDao = new AclDao();
-            if (!aclDao.checkPermission(documentId, PermType.READ, getTargetIdList(null))) {
-                throw new NotFoundException();
-            }
-            criteria.setDocumentId(documentId);
-        }
-        
-        // Search the logs
+
+        int offset = offsetParam != null ? offsetParam : 0;
+        int limit = limitParam != null ? limitParam : 20;
+        Date startDate = startDateParam != null ? new Date(startDateParam) : null;
+        Date endDate = endDateParam != null ? new Date(endDateParam) : null;
+
         AuditLogDao auditLogDao = new AuditLogDao();
-        auditLogDao.findByCriteria(paginatedList, criteria, sortCriteria);
-        
-        // Assemble the results
+        long count = auditLogDao.count(action, targetId, userId, startDate, endDate);
+        List<AuditLogDto> logList = auditLogDao.findAll(action, targetId, userId, startDate, endDate, offset, limit);
+
         JsonArrayBuilder logs = Json.createArrayBuilder();
-        for (AuditLogDto auditLogDto : paginatedList.getResultList()) {
+        for (AuditLogDto log : logList) {
             logs.add(Json.createObjectBuilder()
-                    .add("id", auditLogDto.getId())
-                    .add("username", auditLogDto.getUsername())
-                    .add("target", auditLogDto.getEntityId())
-                    .add("class", auditLogDto.getEntityClass())
-                    .add("type", auditLogDto.getType().name())
-                    .add("message", JsonUtil.nullable(auditLogDto.getMessage()))
-                    .add("create_date", auditLogDto.getCreateTimestamp()));
+                    .add("id", log.getId())
+                    .add("username", log.getUsername())
+                    .add("action", log.getAction())
+                    .add("target_id", JsonUtil.nullable(log.getTargetId()))
+                    .add("detail", JsonUtil.nullable(log.getDetail()))
+                    .add("client_ip", JsonUtil.nullable(log.getClientIp()))
+                    .add("create_date", log.getCreateTimestamp()));
         }
 
-        // Send the response
         JsonObjectBuilder response = Json.createObjectBuilder()
-                .add("logs", logs)
-                .add("total", paginatedList.getResultCount());
+                .add("total", count)
+                .add("logs", logs);
         return Response.ok().entity(response.build()).build();
     }
 }

@@ -97,6 +97,9 @@ public abstract class SecurityFilter implements Filter {
         // Add email
         userPrincipal.setEmail(user.getEmail());
 
+        // Add admin type as request attribute (for AdminTypeFilter)
+        request.setAttribute("admin_type", user.getAdminType() != null ? user.getAdminType() : "NON_ADMIN");
+
         request.setAttribute(PRINCIPAL_ATTRIBUTE, userPrincipal);
     }
 

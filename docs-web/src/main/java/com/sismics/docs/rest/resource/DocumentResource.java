@@ -30,6 +30,8 @@ import com.sismics.docs.core.model.jpa.Document;
 import com.sismics.docs.core.model.jpa.File;
 import com.sismics.docs.core.model.jpa.User;
 import com.sismics.docs.core.util.ConfigUtil;
+import com.sismics.docs.core.util.AuditLogUtil;
+import com.sismics.docs.core.util.DocumentNoUtil;
 import com.sismics.docs.core.util.DocumentUtil;
 import com.sismics.docs.core.util.FileUtil;
 import com.sismics.docs.core.util.MetadataUtil;
@@ -53,6 +55,7 @@ import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HEAD;
@@ -186,6 +189,21 @@ public class DocumentResource extends BaseResource {
             throw new NotFoundException();
         }
 
+        // Check secrecy level access for non-anonymous users
+        if (!principal.isAnonymous() && documentDto.getSecrecyLevel() != null) {
+            UserDao userDao = new UserDao();
+            User currentUser = userDao.getById(principal.getId());
+            if (currentUser != null && currentUser.getSecrecyLevel() != null) {
+                com.sismics.docs.core.constant.UserSecrecyLevel userLevel =
+                        com.sismics.docs.core.constant.UserSecrecyLevel.fromString(currentUser.getSecrecyLevel());
+                com.sismics.docs.core.constant.SecrecyLevel docLevel =
+                        com.sismics.docs.core.constant.SecrecyLevel.fromString(documentDto.getSecrecyLevel());
+                if (!userLevel.canAccess(docLevel)) {
+                    throw new ForbiddenClientException();
+                }
+            }
+        }
+
         JsonObjectBuilder document = createDocumentObjectBuilder(documentDto)
                 .add("creator", documentDto.getCreator())
                 .add("coverage", JsonUtil.nullable(documentDto.getCoverage()))
@@ -196,7 +214,22 @@ public class DocumentResource extends BaseResource {
                 .add("rights", JsonUtil.nullable(documentDto.getRights()))
                 .add("source", JsonUtil.nullable(documentDto.getSource()))
                 .add("subject", JsonUtil.nullable(documentDto.getSubject()))
-                .add("type", JsonUtil.nullable(documentDto.getType()));
+                .add("type", JsonUtil.nullable(documentDto.getType()))
+                .add("classification_id", JsonUtil.nullable(documentDto.getClassificationId()))
+                .add("secrecy_level", JsonUtil.nullable(documentDto.getSecrecyLevel()))
+                .add("urgency", JsonUtil.nullable(documentDto.getUrgency()))
+                .add("doc_no", JsonUtil.nullable(documentDto.getDocNo()))
+                .add("from_unit", JsonUtil.nullable(documentDto.getFromUnit()))
+                .add("handler_dept_id", JsonUtil.nullable(documentDto.getHandlerDeptId()))
+                .add("handler_user_id", JsonUtil.nullable(documentDto.getHandlerUserId()))
+                .add("retention", JsonUtil.nullable(documentDto.getRetention()))
+                .add("archive_no", JsonUtil.nullable(documentDto.getArchiveNo()))
+                .add("status", JsonUtil.nullable(documentDto.getStatus()));
+        if (documentDto.getDocTimestamp() != null) {
+            document.add("doc_date", documentDto.getDocTimestamp());
+        } else {
+            document.addNull("doc_date");
+        }
 
         List<TagDto> tagDtoList = null;
         if (principal.isAnonymous()) {
@@ -447,7 +480,10 @@ public class DocumentResource extends BaseResource {
             @QueryParam("search[title]") String searchTitle,
             @QueryParam("search[uafter]") String searchUpdatedAfter,
             @QueryParam("search[ubefore]") String searchUpdatedBefore,
-            @QueryParam("search[searchworkflow]") String searchWorkflow
+            @QueryParam("search[searchworkflow]") String searchWorkflow,
+            @QueryParam("search[secrecy_level]") String searchSecrecyLevel,
+            @QueryParam("search[status]") String searchStatus,
+            @QueryParam("search[classification]") String searchClassification
     ) {
         if (!authenticate()) {
             throw new ForbiddenClientException();
@@ -480,7 +516,19 @@ public class DocumentResource extends BaseResource {
                 searchUpdatedAfter,
                 searchUpdatedBefore,
                 searchWorkflow,
+                searchSecrecyLevel,
+                searchStatus,
+                searchClassification,
                 allTagDtoList);
+
+        // Apply secrecy level filtering based on current user's clearance
+        UserDao userDao = new UserDao();
+        User currentUser = userDao.getById(principal.getId());
+        if (currentUser != null && currentUser.getSecrecyLevel() != null) {
+            com.sismics.docs.core.constant.UserSecrecyLevel userLevel =
+                    com.sismics.docs.core.constant.UserSecrecyLevel.fromString(currentUser.getSecrecyLevel());
+            documentCriteria.setUserClearanceLevel(userLevel.getClearanceLevel());
+        }
 
         documentCriteria.setTargetIdList(getTargetIdList(null));
         try {
@@ -521,6 +569,9 @@ public class DocumentResource extends BaseResource {
                     .add("current_step_name", JsonUtil.nullable(documentDto.getCurrentStepName()))
                     .add("highlight", JsonUtil.nullable(documentDto.getHighlight()))
                     .add("file_count", filesCount)
+                    .add("doc_no", JsonUtil.nullable(documentDto.getDocNo()))
+                    .add("secrecy_level", JsonUtil.nullable(documentDto.getSecrecyLevel()))
+                    .add("status", JsonUtil.nullable(documentDto.getStatus()))
                     .add("tags", createTagsArrayBuilder(tagDtoList));
 
             if (Boolean.TRUE == files) {
@@ -584,7 +635,10 @@ public class DocumentResource extends BaseResource {
             @FormParam("search[title]") String searchTitle,
             @FormParam("search[uafter]") String searchUpdatedAfter,
             @FormParam("search[ubefore]") String searchUpdatedBefore,
-            @FormParam("search[searchworkflow]") String searchWorkflow
+            @FormParam("search[searchworkflow]") String searchWorkflow,
+            @FormParam("search[secrecy_level]") String searchSecrecyLevel,
+            @FormParam("search[status]") String searchStatus,
+            @FormParam("search[classification]") String searchClassification
     ) {
         return list(
                 limit,
@@ -606,7 +660,10 @@ public class DocumentResource extends BaseResource {
                 searchTitle,
                 searchUpdatedAfter,
                 searchUpdatedBefore,
-                searchWorkflow
+                searchWorkflow,
+                searchSecrecyLevel,
+                searchStatus,
+                searchClassification
         );
     }
 
@@ -673,7 +730,18 @@ public class DocumentResource extends BaseResource {
             @FormParam("metadata_id") List<String> metadataIdList,
             @FormParam("metadata_value") List<String> metadataValueList,
             @FormParam("language") String language,
-            @FormParam("create_date") String createDateStr) {
+            @FormParam("create_date") String createDateStr,
+            @FormParam("classification_id") String classificationId,
+            @FormParam("secrecy_level") String secrecyLevel,
+            @FormParam("urgency") String urgency,
+            @FormParam("doc_no") String docNo,
+            @FormParam("from_unit") String fromUnit,
+            @FormParam("handler_dept_id") String handlerDeptId,
+            @FormParam("handler_user_id") String handlerUserId,
+            @FormParam("doc_date") String docDateStr,
+            @FormParam("retention") String retention,
+            @FormParam("archive_no") String archiveNo,
+            @FormParam("status") String status) {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
@@ -690,10 +758,24 @@ public class DocumentResource extends BaseResource {
         type = ValidationUtil.validateLength(type, "type", 0, 100, true);
         coverage = ValidationUtil.validateLength(coverage, "coverage", 0, 100, true);
         rights = ValidationUtil.validateLength(rights, "rights", 0, 100, true);
+        classificationId = ValidationUtil.validateLength(classificationId, "classification_id", 0, 36, true);
+        secrecyLevel = ValidationUtil.validateLength(secrecyLevel, "secrecy_level", 0, 20, true);
+        urgency = ValidationUtil.validateLength(urgency, "urgency", 0, 20, true);
+        docNo = ValidationUtil.validateLength(docNo, "doc_no", 0, 100, true);
+        fromUnit = ValidationUtil.validateLength(fromUnit, "from_unit", 0, 200, true);
+        handlerDeptId = ValidationUtil.validateLength(handlerDeptId, "handler_dept_id", 0, 36, true);
+        handlerUserId = ValidationUtil.validateLength(handlerUserId, "handler_user_id", 0, 36, true);
+        retention = ValidationUtil.validateLength(retention, "retention", 0, 20, true);
+        archiveNo = ValidationUtil.validateLength(archiveNo, "archive_no", 0, 100, true);
+        status = ValidationUtil.validateLength(status, "status", 0, 20, true);
+        Date docDate = ValidationUtil.validateDate(docDateStr, "doc_date", true);
         Date createDate = ValidationUtil.validateDate(createDateStr, "create_date", true);
         if (!Constants.SUPPORTED_LANGUAGES.contains(language)) {
             throw new ClientException("ValidationError", MessageFormat.format("{0} is not a supported language", language));
         }
+
+        // Check user's secrecy level clearance for document creation
+        checkSecrecyLevelPermission(secrecyLevel);
 
         // Create the document
         Document document = new Document();
@@ -708,6 +790,22 @@ public class DocumentResource extends BaseResource {
         document.setType(type);
         document.setCoverage(coverage);
         document.setRights(rights);
+        document.setClassificationId(classificationId);
+        document.setSecrecyLevel(secrecyLevel);
+        document.setUrgency(urgency);
+        if (docNo == null && classificationId != null) {
+            docNo = DocumentNoUtil.generateDocumentNo(classificationId);
+        }
+        document.setDocNo(docNo);
+        document.setFromUnit(fromUnit);
+        document.setHandlerDeptId(handlerDeptId);
+        document.setHandlerUserId(handlerUserId);
+        document.setRetention(retention);
+        document.setArchiveNo(archiveNo);
+        document.setStatus(status);
+        if (docDate != null) {
+            document.setDocDate(docDate);
+        }
         document.setLanguage(language);
         if (createDate == null) {
             document.setCreateDate(new Date());
@@ -795,14 +893,25 @@ public class DocumentResource extends BaseResource {
             @FormParam("metadata_id") List<String> metadataIdList,
             @FormParam("metadata_value") List<String> metadataValueList,
             @FormParam("language") String language,
-            @FormParam("create_date") String createDateStr) {
+            @FormParam("create_date") String createDateStr,
+            @FormParam("classification_id") String classificationId,
+            @FormParam("secrecy_level") String secrecyLevel,
+            @FormParam("urgency") String urgency,
+            @FormParam("doc_no") String docNo,
+            @FormParam("from_unit") String fromUnit,
+            @FormParam("handler_dept_id") String handlerDeptId,
+            @FormParam("handler_user_id") String handlerUserId,
+            @FormParam("doc_date") String docDateStr,
+            @FormParam("retention") String retention,
+            @FormParam("archive_no") String archiveNo,
+            @FormParam("status") String status) {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
 
         // Validate input data
-        title = ValidationUtil.validateLength(title, "title", 1, 100, false);
-        language = ValidationUtil.validateLength(language, "language", 3, 7, false);
+        title = ValidationUtil.validateLength(title, "title", 1, 100, true);
+        language = ValidationUtil.validateLength(language, "language", 3, 7, true);
         description = ValidationUtil.validateLength(description, "description", 0, 4000, true);
         subject = ValidationUtil.validateLength(subject, "subject", 0, 500, true);
         identifier = ValidationUtil.validateLength(identifier, "identifier", 0, 500, true);
@@ -812,6 +921,17 @@ public class DocumentResource extends BaseResource {
         type = ValidationUtil.validateLength(type, "type", 0, 100, true);
         coverage = ValidationUtil.validateLength(coverage, "coverage", 0, 100, true);
         rights = ValidationUtil.validateLength(rights, "rights", 0, 100, true);
+        classificationId = ValidationUtil.validateLength(classificationId, "classification_id", 0, 36, true);
+        secrecyLevel = ValidationUtil.validateLength(secrecyLevel, "secrecy_level", 0, 20, true);
+        urgency = ValidationUtil.validateLength(urgency, "urgency", 0, 20, true);
+        docNo = ValidationUtil.validateLength(docNo, "doc_no", 0, 100, true);
+        fromUnit = ValidationUtil.validateLength(fromUnit, "from_unit", 0, 200, true);
+        handlerDeptId = ValidationUtil.validateLength(handlerDeptId, "handler_dept_id", 0, 36, true);
+        handlerUserId = ValidationUtil.validateLength(handlerUserId, "handler_user_id", 0, 36, true);
+        retention = ValidationUtil.validateLength(retention, "retention", 0, 20, true);
+        archiveNo = ValidationUtil.validateLength(archiveNo, "archive_no", 0, 100, true);
+        status = ValidationUtil.validateLength(status, "status", 0, 20, true);
+        Date docDate = ValidationUtil.validateDate(docDateStr, "doc_date", true);
         Date createDate = ValidationUtil.validateDate(createDateStr, "create_date", true);
         if (language != null && !Constants.SUPPORTED_LANGUAGES.contains(language)) {
             throw new ClientException("ValidationError", MessageFormat.format("{0} is not a supported language", language));
@@ -830,22 +950,80 @@ public class DocumentResource extends BaseResource {
             throw new NotFoundException();
         }
 
-        // Update the document
-        document.setTitle(title);
-        document.setDescription(description);
-        document.setSubject(subject);
-        document.setIdentifier(identifier);
-        document.setPublisher(publisher);
-        document.setFormat(format);
-        document.setSource(source);
-        document.setType(type);
-        document.setCoverage(coverage);
-        document.setRights(rights);
-        document.setLanguage(language);
-        if (createDate == null) {
-            document.setCreateDate(new Date());
-        } else {
+        // Update the document (only update fields that are provided)
+        if (title != null) {
+            document.setTitle(title);
+        }
+        if (description != null) {
+            document.setDescription(description);
+        }
+        if (subject != null) {
+            document.setSubject(subject);
+        }
+        if (identifier != null) {
+            document.setIdentifier(identifier);
+        }
+        if (publisher != null) {
+            document.setPublisher(publisher);
+        }
+        if (format != null) {
+            document.setFormat(format);
+        }
+        if (source != null) {
+            document.setSource(source);
+        }
+        if (type != null) {
+            document.setType(type);
+        }
+        if (coverage != null) {
+            document.setCoverage(coverage);
+        }
+        if (rights != null) {
+            document.setRights(rights);
+        }
+        if (classificationId != null) {
+            document.setClassificationId(classificationId);
+        }
+        if (secrecyLevel != null) {
+            document.setSecrecyLevel(secrecyLevel);
+        }
+        if (urgency != null) {
+            document.setUrgency(urgency);
+        }
+        if (docNo != null) {
+            document.setDocNo(docNo);
+        }
+        if (fromUnit != null) {
+            document.setFromUnit(fromUnit);
+        }
+        if (handlerDeptId != null) {
+            document.setHandlerDeptId(handlerDeptId);
+        }
+        if (handlerUserId != null) {
+            document.setHandlerUserId(handlerUserId);
+        }
+        if (retention != null) {
+            document.setRetention(retention);
+        }
+        if (archiveNo != null) {
+            document.setArchiveNo(archiveNo);
+        }
+        if (status != null) {
+            document.setStatus(status);
+        }
+        if (docDate != null) {
+            document.setDocDate(docDate);
+        }
+        if (language != null) {
+            document.setLanguage(language);
+        }
+        if (createDate != null) {
             document.setCreateDate(createDate);
+        }
+
+        // Check user's secrecy level clearance if updating secrecy level
+        if (secrecyLevel != null) {
+            checkSecrecyLevelPermission(secrecyLevel);
         }
 
         documentDao.update(document, principal.getId());
@@ -871,6 +1049,246 @@ public class DocumentResource extends BaseResource {
 
         JsonObjectBuilder response = Json.createObjectBuilder()
                 .add("id", id);
+        return Response.ok().entity(response.build()).build();
+    }
+
+    /**
+     * Transition document status to REVIEWING (收文登记/提交审核).
+     *
+     * @param id Document ID
+     * @return Response
+     */
+    @POST
+    @Path("{id: [a-z0-9\\-]+}/submit")
+    public Response submit(@PathParam("id") String id) {
+        return transitionStatus(id, "REVIEWING");
+    }
+
+    /**
+     * Transition document status to APPROVED (审批通过).
+     *
+     * @param id Document ID
+     * @return Response
+     */
+    @POST
+    @Path("{id: [a-z0-9\\-]+}/approve")
+    public Response approve(@PathParam("id") String id) {
+        return transitionStatus(id, "APPROVED");
+    }
+
+    /**
+     * Transition document status to ISSUED (发文签发).
+     *
+     * @param id Document ID
+     * @return Response
+     */
+    @POST
+    @Path("{id: [a-z0-9\\-]+}/issue")
+    public Response issue(@PathParam("id") String id) {
+        return transitionStatus(id, "ISSUED");
+    }
+
+    /**
+     * Transition document status to ARCHIVED (归档).
+     *
+     * @param id Document ID
+     * @return Response
+     */
+    @POST
+    @Path("{id: [a-z0-9\\-]+}/archive")
+    public Response archive(@PathParam("id") String id) {
+        return transitionStatus(id, "ARCHIVED");
+    }
+
+    /**
+     * Transition document status to REJECTED (退回/驳回).
+     *
+     * @param id Document ID
+     * @return Response
+     */
+    @POST
+    @Path("{id: [a-z0-9\\-]+}/reject")
+    public Response reject(@PathParam("id") String id) {
+        return transitionStatus(id, "REJECTED");
+    }
+
+    /**
+     * Helper method to transition document status.
+     *
+     * @param id Document ID
+     * @param newStatus New status
+     * @return Response
+     */
+    private Response transitionStatus(String id, String newStatus) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+        // Check write permission
+        AclDao aclDao = new AclDao();
+        if (!aclDao.checkPermission(id, PermType.WRITE, getTargetIdList(null))) {
+            throw new ForbiddenClientException();
+        }
+
+        DocumentDao documentDao = new DocumentDao();
+        Document document = documentDao.getById(id);
+        if (document == null) {
+            throw new NotFoundException();
+        }
+
+        document.setStatus(newStatus);
+        documentDao.update(document, principal.getId());
+
+        JsonObjectBuilder response = Json.createObjectBuilder()
+                .add("id", id)
+                .add("status", newStatus);
+        return Response.ok().entity(response.build()).build();
+    }
+
+    /**
+     * Check if the current user's secrecy clearance level allows creating/updating a document with the given secrecy level.
+     *
+     * @param docSecrecyLevel Document secrecy level
+     */
+    private void checkSecrecyLevelPermission(String docSecrecyLevel) {
+        if (docSecrecyLevel == null) {
+            return;
+        }
+        UserDao userDao = new UserDao();
+        User currentUser = userDao.getById(principal.getId());
+        if (currentUser == null || currentUser.getSecrecyLevel() == null) {
+            throw new ForbiddenClientException();
+        }
+        com.sismics.docs.core.constant.UserSecrecyLevel userLevel =
+                com.sismics.docs.core.constant.UserSecrecyLevel.fromString(currentUser.getSecrecyLevel());
+        com.sismics.docs.core.constant.SecrecyLevel documentLevel =
+                com.sismics.docs.core.constant.SecrecyLevel.fromString(docSecrecyLevel);
+        if (!userLevel.canAccess(documentLevel)) {
+            throw new ForbiddenClientException();
+        }
+    }
+
+    /**
+     * Update document secrecy level (only SecurityAdmin with classifier privilege).
+     *
+     * @api {post} /document/:id/secrecy Update document secrecy level
+     * @apiName PostDocumentSecrecy
+     * @apiGroup Document
+     * @apiParam {String} id Document ID
+     * @apiParam {String} secrecy_level New secrecy level
+     * @apiPermission security_admin
+     * @apiSuccess {String} status Status OK
+     * @apiError (client) ForbiddenError Access denied
+     * @apiError (client) ClientException Not a classifier / Document not found
+     * @apiVersion 1.12.0
+     *
+     * @param id Document ID
+     * @param secrecyLevelParam New secrecy level
+     * @return Response
+     */
+    @POST
+    @Path("{id: [a-z0-9\\-]+}/secrecy")
+    @com.sismics.docs.rest.annotation.RequireAdminType({"SECURITY_ADMIN", "SYSTEM_ADMIN"})
+    public Response updateSecrecy(
+            @PathParam("id") String id,
+            @FormParam("secrecy_level") String secrecyLevelParam) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+        secrecyLevelParam = ValidationUtil.validateLength(secrecyLevelParam, "secrecy_level", 1, 20, false);
+
+        AclDao aclDao = new AclDao();
+        if (!aclDao.checkPermission(id, PermType.WRITE, getTargetIdList(null))) {
+            throw new ForbiddenClientException();
+        }
+
+        DocumentDao documentDao = new DocumentDao();
+        Document document = documentDao.getById(id);
+        if (document == null) {
+            throw new NotFoundException();
+        }
+
+        // Check that the user is a classifier
+        UserDao userDao = new UserDao();
+        User currentUser = userDao.getById(principal.getId());
+        if (currentUser == null || !currentUser.isClassifier()) {
+            throw new ClientException("NotClassifier", "Only classifiers can change document secrecy level");
+        }
+
+        // Verify clearance level
+        checkSecrecyLevelPermission(secrecyLevelParam);
+
+        String oldLevel = document.getSecrecyLevel();
+        document.setSecrecyLevel(secrecyLevelParam);
+        documentDao.update(document, principal.getId());
+
+        // Audit log for secrecy change
+        AuditLogUtil.log(principal.getId(), principal.getName(), request.getRemoteAddr(),
+                "SECRECY_CHANGE", id,
+                "Secrecy level changed from [" + oldLevel + "] to [" + secrecyLevelParam + "]");
+
+        JsonObjectBuilder response = Json.createObjectBuilder()
+                .add("status", "ok");
+        return Response.ok().entity(response.build()).build();
+    }
+
+    /**
+     * List audit logs (only AuditAdmin).
+     *
+     * @api {get} /document/audit List audit logs
+     * @apiName GetDocumentAudit
+     * @apiGroup Document
+     * @apiParam {String} action Filter by action type
+     * @apiParam {String} targetId Filter by target ID
+     * @apiParam {String} userId Filter by user ID
+     * @apiParam {Number} startDate Start timestamp
+     * @apiParam {Number} endDate End timestamp
+     * @apiParam {Number} offset Offset
+     * @apiParam {Number} limit Limit
+     * @apiPermission audit_admin
+     * @apiSuccess {Number} total Total count
+     * @apiSuccess {Object[]} logs Audit log list
+     * @apiVersion 1.12.0
+     */
+    @GET
+    @Path("audit")
+    @com.sismics.docs.rest.annotation.RequireAdminType({"AUDIT_ADMIN", "SYSTEM_ADMIN"})
+    public Response listAuditLog(
+            @QueryParam("action") String action,
+            @QueryParam("targetId") String targetId,
+            @QueryParam("userId") String userId,
+            @QueryParam("startDate") Long startDateParam,
+            @QueryParam("endDate") Long endDateParam,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("20") int limit) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+        Date startDate = startDateParam != null ? new Date(startDateParam) : null;
+        Date endDate = endDateParam != null ? new Date(endDateParam) : null;
+
+        com.sismics.docs.core.dao.AuditLogDao auditLogDao = new com.sismics.docs.core.dao.AuditLogDao();
+        long count = auditLogDao.count(action, targetId, userId, startDate, endDate);
+        List<com.sismics.docs.core.dao.dto.AuditLogDto> logList =
+                auditLogDao.findAll(action, targetId, userId, startDate, endDate, offset, limit);
+
+        JsonArrayBuilder logs = Json.createArrayBuilder();
+        for (com.sismics.docs.core.dao.dto.AuditLogDto log : logList) {
+            logs.add(Json.createObjectBuilder()
+                    .add("id", log.getId())
+                    .add("username", log.getUsername())
+                    .add("action", log.getAction())
+                    .add("target_id", JsonUtil.nullable(log.getTargetId()))
+                    .add("detail", JsonUtil.nullable(log.getDetail()))
+                    .add("client_ip", JsonUtil.nullable(log.getClientIp()))
+                    .add("create_date", log.getCreateTimestamp()));
+        }
+
+        JsonObjectBuilder response = Json.createObjectBuilder()
+                .add("total", count)
+                .add("logs", logs);
         return Response.ok().entity(response.build()).build();
     }
 
