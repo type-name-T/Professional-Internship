@@ -1,0 +1,150 @@
+<!-- 首页工作台 -->
+<div class="dashboard">
+  <!-- 顶部统计卡片 -->
+  <div class="row stats-cards">
+    <div class="col-lg-3 col-md-6 col-sm-6">
+      <div class="stat-card stat-pending" ng-click="goTo('/document/todo')">
+        <div class="stat-card-icon">
+          <span class="fas fa-tasks"></span>
+        </div>
+        <div class="stat-card-body">
+          <div class="stat-card-value">{{ stats.pendingCount || 0 }}</div>
+          <div class="stat-card-label">待办事项</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-sm-6">
+      <div class="stat-card stat-read" ng-click="goTo('/document/inbox')">
+        <div class="stat-card-icon">
+          <span class="fas fa-envelope-open-text"></span>
+        </div>
+        <div class="stat-card-body">
+          <div class="stat-card-value">{{ stats.todoReadCount || 0 }}</div>
+          <div class="stat-card-label">待阅文件</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-sm-6">
+      <div class="stat-card stat-docs" ng-click="goTo('/document/mydocs')">
+        <div class="stat-card-icon">
+          <span class="fas fa-folder-open"></span>
+        </div>
+        <div class="stat-card-body">
+          <div class="stat-card-value">{{ stats.myDocCount || 0 }}</div>
+          <div class="stat-card-label">我的文档</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-sm-6">
+      <div class="stat-card stat-done" ng-click="goTo('/document/done')">
+        <div class="stat-card-icon">
+          <span class="fas fa-check-double"></span>
+        </div>
+        <div class="stat-card-body">
+          <div class="stat-card-value">{{ stats.doneCount || 0 }}</div>
+          <div class="stat-card-label">已办事项</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 快捷入口 -->
+  <div class="panel panel-default quick-actions-panel">
+    <div class="panel-heading">
+      <span class="fas fa-bolt"></span> 快捷入口
+    </div>
+    <div class="panel-body">
+      <a href="#/document/incoming/add" class="btn btn-primary btn-quick">
+        <span class="fas fa-inbox"></span> 收文登记
+      </a>
+      <a href="#/document/outgoing/add" class="btn btn-success btn-quick">
+        <span class="fas fa-paper-plane"></span> 发文拟稿
+      </a>
+      <a href="#/document/list?status=PENDING" class="btn btn-warning btn-quick">
+        <span class="fas fa-hourglass-half"></span> 待办审批
+      </a>
+      <a href="#/document/add" class="btn btn-info btn-quick">
+        <span class="fas fa-plus"></span> 新建文档
+      </a>
+    </div>
+  </div>
+
+  <!-- 待办列表 + 通知公告 -->
+  <div class="row">
+    <div class="col-md-7">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <span class="fas fa-tasks"></span> 待办事项
+          <a href="#/document/todo" class="pull-right small">查看全部 &raquo;</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover" ng-if="pendingList.length > 0">
+            <thead>
+              <tr>
+                <th>标题</th>
+                <th>类型</th>
+                <th>紧急程度</th>
+                <th>到达时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="item in pendingList">
+                <td class="td-title">{{ item.title }}</td>
+                <td><span class="label" ng-class="getClassificationClass(item.classification)">{{ item.classificationName || item.classification }}</span></td>
+                <td><span class="label" ng-class="getUrgencyClass(item.urgency)">{{ item.urgency || '一般' }}</span></td>
+                <td>{{ item.createDate | date:'MM-dd HH:mm' }}</td>
+                <td>
+                  <a href="#/document/view/{{ item.id }}" class="btn btn-xs btn-primary">处理</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center text-muted pd-30" ng-if="!pendingList || pendingList.length === 0">
+            <span class="fas fa-check-circle" style="font-size:32px;color:#5cb85c;"></span>
+            <p>暂无待办事项</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <span class="fas fa-bullhorn"></span> 通知公告
+        </div>
+        <div class="panel-body notice-list">
+          <div ng-if="noticeList.length > 0">
+            <div class="notice-item" ng-repeat="notice in noticeList">
+              <div class="notice-date">{{ notice.createDate | date:'MM-dd' }}</div>
+              <div class="notice-content">
+                <a href="#/document/view/{{ notice.id }}">{{ notice.title }}</a>
+              </div>
+            </div>
+          </div>
+          <div class="text-center text-muted pd-30" ng-if="!noticeList || noticeList.length === 0">
+            <span class="fas fa-info-circle" style="font-size:32px;"></span>
+            <p>暂无通知公告</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 最近操作 -->
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <span class="fas fa-history"></span> 最近操作
+        </div>
+        <div class="panel-body">
+          <div class="activity-item" ng-repeat="activity in recentActivities">
+            <span class="activity-icon"><span class="fas" ng-class="activity.icon || 'fa-circle'"></span></span>
+            <span class="activity-text">{{ activity.description }}</span>
+            <span class="activity-time pull-right text-muted small">{{ activity.date | date:'HH:mm' }}</span>
+          </div>
+          <div class="text-center text-muted pd-20" ng-if="!recentActivities || recentActivities.length === 0">
+            <p>暂无操作记录</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

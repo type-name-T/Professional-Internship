@@ -15,7 +15,7 @@ Teedy is an open source, lightweight document management system for individuals 
 
 ![New!](https://teedy.io/img/laptop-demo.png?20180301)
 
-# Demo
+# Demolbf
 
 A demo is available at [demo.teedy.io](https://demo.teedy.io)
 

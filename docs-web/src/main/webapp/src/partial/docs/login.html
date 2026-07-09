@@ -1,35 +1,35 @@
 <style>
-  /* No navbar in login screen */
-  .navbar {
-    display: none;
+  /* Hide top bar and sidebar on login screen */
+  .top-bar,
+  .layout-sidebar {
+    display: none !important;
   }
 
-  /* Absolute positionned footer on top of the login background */
-  .footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border: none;
-  }
-
-  @media screen and (min-width: 768px) {
-    .footer {
-      width: 50%;
-    }
-  }
-
-  /* Smaller links everywhere on login */
-  a {
-    font-size: 90%;
-    color: #666;
+  .layout-content {
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh;
   }
 </style>
+
+<!-- Full-page blurred background -->
+<div class="login-bg"></div>
+<div class="login-overlay"></div>
+
 <div class="row vertical-center">
+  <!-- Mobile logo (visible only on xs) -->
+  <div class="col-xs-12 visible-xs login-mobile-logo">
+    <img src="img/school-logo.png" class="img-responsive center-block" alt="校标" />
+  </div>
+
   <div class="col-sm-6 col-xs-12 login-box">
     <div class="row">
-      <div class="col-lg-offset-4 col-lg-4 col-xs-offset-1 col-xs-10">
-        <img src="img/title.png" class="img-responsive" />
+      <div class="col-lg-offset-3 col-lg-6 col-xs-offset-1 col-xs-10">
+        <div class="login-title">
+          <h1>机关单位电子文档管理系统</h1>
+          <div class="divider"></div>
+        </div>
 
         <form>
           <div class="form-group">
@@ -84,5 +84,8 @@
     </div>
   </div>
 
-  <div class="login-img-container col-sm-6 hidden-xs"></div>
+  <!-- School logo on the right (hidden on xs) -->
+  <div class="login-logo-container col-sm-6 hidden-xs">
+    <img src="img/school-logo.png" alt="校标" />
+  </div>
 </div>

@@ -28,6 +28,15 @@ angular.module('docs',
         }
       }
     })
+    .state('dashboard', {
+      url: '/dashboard',
+      views: {
+        'page': {
+          templateUrl: 'partial/docs/dashboard.html',
+          controller: 'Dashboard'
+        }
+      }
+    })
     .state('passwordreset', {
       url: '/passwordreset/:key',
       views: {
@@ -289,6 +298,77 @@ angular.module('docs',
         'document': {
           templateUrl: 'partial/docs/document.edit.html',
           controller: 'DocumentEdit'
+        }
+      }
+    })
+    .state('document.govlist', {
+      url: '/list?type&status',
+      views: {
+        'document': {
+          templateUrl: 'partial/docs/document.govlist.html',
+          controller: 'DocumentGovList'
+        }
+      }
+    })
+    .state('document.incoming', {
+      url: '/incoming',
+      abstract: true,
+      views: {
+        'document': {
+          templateUrl: 'partial/docs/document.incoming.html',
+          controller: 'DocumentIncoming'
+        }
+      }
+    })
+    .state('document.incoming.add', {
+      url: '/add'
+    })
+    .state('document.outgoing', {
+      url: '/outgoing',
+      abstract: true,
+      views: {
+        'document': {
+          templateUrl: 'partial/docs/document.outgoing.html',
+          controller: 'DocumentOutgoing'
+        }
+      }
+    })
+    .state('document.outgoing.add', {
+      url: '/add'
+    })
+    .state('document.todo', {
+      url: '/todo',
+      views: {
+        'document': {
+          templateUrl: 'partial/docs/document.govlist.html',
+          controller: 'DocumentGovList'
+        }
+      }
+    })
+    .state('document.done', {
+      url: '/done',
+      views: {
+        'document': {
+          templateUrl: 'partial/docs/document.govlist.html',
+          controller: 'DocumentGovList'
+        }
+      }
+    })
+    .state('document.mydocs', {
+      url: '/mydocs',
+      views: {
+        'document': {
+          templateUrl: 'partial/docs/document.govlist.html',
+          controller: 'DocumentGovList'
+        }
+      }
+    })
+    .state('document.inbox', {
+      url: '/inbox',
+      views: {
+        'document': {
+          templateUrl: 'partial/docs/document.govlist.html',
+          controller: 'DocumentGovList'
         }
       }
     })

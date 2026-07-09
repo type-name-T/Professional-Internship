@@ -1,0 +1,140 @@
+<!-- 收文登记表单 -->
+<div class="doc-form">
+  <div class="page-header">
+    <h3 class="page-title"><span class="fas fa-inbox"></span> 收文登记</h3>
+    <div class="page-actions">
+      <a href="#/document/list?type=RECEIVE" class="btn btn-sm btn-default">
+        <span class="fas fa-arrow-left"></span> 返回列表
+      </a>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <span class="fas fa-file-import"></span> 来文基本信息
+    </div>
+    <div class="panel-body">
+      <form class="form-horizontal">
+        <!-- 收文号 -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label">收文号</label>
+          <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="doc.docNo" readonly
+                   placeholder="系统自动生成" />
+          </div>
+          <label class="col-sm-2 control-label">收文日期 <span class="text-red">*</span></label>
+          <div class="col-sm-4">
+            <input type="date" class="form-control" ng-model="doc.receiveDate" />
+          </div>
+        </div>
+
+        <!-- 来文单位 + 来文字号 -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label">来文单位 <span class="text-red">*</span></label>
+          <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="doc.fromUnit"
+                   placeholder="请输入来文单位全称" />
+          </div>
+          <label class="col-sm-2 control-label">来文字号</label>
+          <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="doc.fromDocNo"
+                   placeholder="来文单位文号" />
+          </div>
+        </div>
+
+        <!-- 文件标题 -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label">文件标题 <span class="text-red">*</span></label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" ng-model="doc.title"
+                   placeholder="请输入文件标题" />
+          </div>
+        </div>
+
+        <!-- 密级 + 紧急程度 -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label">密级 <span class="text-red">*</span></label>
+          <div class="col-sm-4">
+            <select class="form-control" ng-model="doc.secrecyLevel">
+              <option value="PUBLIC">公开</option>
+              <option value="INTERNAL" selected>内部</option>
+              <option value="SECRET">秘密</option>
+              <option value="CONFIDENTIAL">机密</option>
+              <option value="TOP_SECRET">绝密</option>
+            </select>
+          </div>
+          <label class="col-sm-2 control-label">紧急程度</label>
+          <div class="col-sm-4">
+            <select class="form-control" ng-model="doc.urgency">
+              <option value="NORMAL" selected>一般</option>
+              <option value="URGENT">紧急</option>
+              <option value="EMERGENCY">特急</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 份数 + 页数 -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label">份数</label>
+          <div class="col-sm-4">
+            <input type="number" class="form-control" ng-model="doc.copyCount"
+                   min="1" value="1" />
+          </div>
+          <label class="col-sm-2 control-label">页数</label>
+          <div class="col-sm-4">
+            <input type="number" class="form-control" ng-model="doc.pageCount" min="1" />
+          </div>
+        </div>
+
+        <!-- 主题词 -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label">主题词</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" ng-model="doc.keywords"
+                   placeholder="多个主题词用逗号分隔" />
+          </div>
+        </div>
+
+        <!-- 附件上传 -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label">附件</label>
+          <div class="col-sm-10">
+            <div class="upload-area" ng-file-drop ng-model="files">
+              <span class="fas fa-cloud-upload-alt"></span>
+              <span>点击或拖拽文件到此处上传附件</span>
+              <input type="file" ng-file-select ng-model="files" multiple />
+            </div>
+            <div class="file-list" ng-if="files.length > 0">
+              <div class="file-item" ng-repeat="file in files">
+                <span class="fas fa-paperclip"></span> {{ file.name }}
+                <span class="text-muted">({{ file.size | filesize }})</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 备注 -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label">备注</label>
+          <div class="col-sm-10">
+            <textarea class="form-control" rows="3" ng-model="doc.notes"
+                      placeholder="其他需要说明的信息"></textarea>
+          </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary" ng-click="saveDraft()">
+              <span class="fas fa-save"></span> 保存草稿
+            </button>
+            <button type="submit" class="btn btn-success" ng-click="submit()">
+              <span class="fas fa-paper-plane"></span> 提交拟办
+            </button>
+            <a href="#/document/list?type=RECEIVE" class="btn btn-link">取消</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

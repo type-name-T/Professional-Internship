@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="docs">
   <head>
-    <title ng-bind-template="{{ pageTitle ? pageTitle : appName }}">Teedy</title>
+    <title ng-bind-template="{{ pageTitle ? pageTitle : appName }}">机关单位电子文档管理系统</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -59,9 +59,14 @@
     <script src="app/docs/controller/ModalImport.js" type="text/javascript"></script>
     <script src="app/docs/controller/PasswordReset.js" type="text/javascript"></script>
     <script src="app/docs/controller/Navigation.js" type="text/javascript"></script>
+    <script src="app/docs/controller/Sidebar.js" type="text/javascript"></script>
+    <script src="app/docs/controller/Dashboard.js" type="text/javascript"></script>
     <script src="app/docs/controller/Footer.js" type="text/javascript"></script>
     <script src="app/docs/controller/document/Document.js" type="text/javascript"></script>
     <script src="app/docs/controller/document/DocumentDefault.js" type="text/javascript"></script>
+    <script src="app/docs/controller/document/DocumentGovList.js" type="text/javascript"></script>
+    <script src="app/docs/controller/document/DocumentIncoming.js" type="text/javascript"></script>
+    <script src="app/docs/controller/document/DocumentOutgoing.js" type="text/javascript"></script>
     <script src="app/docs/controller/document/DocumentEdit.js" type="text/javascript"></script>
     <script src="app/docs/controller/document/DocumentView.js" type="text/javascript"></script>
     <script src="app/docs/controller/document/DocumentViewContent.js" type="text/javascript"></script>
@@ -114,108 +119,59 @@
   <body translate-cloak ng-cloak>
     <onboarding-popover ng-if="onboardingEnabled" enabled="onboardingEnabled" steps="onboardingSteps"></onboarding-popover>
 
-    <nav class="navbar navbar-default" role="navigation" ng-controller="Navigation">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle"
-                ng-init="isCollapsed = true"
-                ng-click="isCollapsed = !isCollapsed">
-          <span class="sr-only">{{ 'index.toggle_navigation' | translate }}</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
+    <!-- ========== 顶部导航栏 ========== -->
+    <nav class="top-bar" role="navigation" ng-controller="Navigation">
+      <div ng-controller="Footer" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <div class="top-bar-left">
+        <button type="button" class="sidebar-toggle" ng-click="sidebarCollapsed = !sidebarCollapsed"
+                ng-init="sidebarCollapsed = false">
+          <span class="fas fa-bars"></span>
         </button>
-
-        <a class="navbar-brand" href="#">
-          <span ng-if="appName == 'Teedy'">
-            <span style="color: #2aabd2;">teedy</span>
-          </span>
-          <span ng-if="appName != 'Teedy'" style="color: #888;">{{ appName }}</span>
+        <a class="top-bar-brand" href="#">
+          <img src="img/school-logo.png" class="top-bar-logo" alt="校标" />
+          <span>机关单位电子文档管理系统</span>
         </a>
       </div>
 
-      <div class="collapse navbar-collapse" uib-collapse="isCollapsed">
-        <ul class="nav navbar-nav" ng-show="!userInfo.anonymous">
-          <li ui-sref-active="{ active: 'document.**' }">
-            <a href="#/document"><span class="fas fa-book"></span> {{ 'index.nav_documents' | translate }}</a>
-          </li>
-          <li ui-sref-active="{ active: 'tag.**' }" id="navigation-tag">
-            <a href="#/tag"><span class="fas fa-tags"></span> {{ 'index.nav_tags' | translate }}</a>
-          </li>
-          <li ui-sref-active="{ active: 'user.**', active2: 'group.**' }">
-            <a href="#/user"><span class="fas fa-user"></span> {{ 'index.nav_users_groups' | translate }}</a>
-          </li>
-        </ul>
+      <div class="top-bar-right" ng-show="!userInfo.anonymous">
+        <!-- 语言切换 -->
+        <div class="top-bar-item" uib-dropdown>
+          <a href uib-dropdown-toggle class="top-bar-link">
+            <span class="fas fa-globe"></span>
+            <span class="hidden-xs">{{ currentLangLabel || '简体中文' }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href ng-click="changeLanguage('zh_CN')">简体中文</a></li>
+            <li><a href ng-click="changeLanguage('en')">English</a></li>
+          </ul>
+        </div>
 
-        <ul class="nav navbar-nav navbar-right" ng-show="!userInfo.anonymous">
-          <li>
-            <a href="{{ userInfo.username == 'guest' ? '#/user/guest' : '#/settings/account' }}"
-               translate-attr="{ title: 'index.logged_as' }" translate-values="{ username: userInfo.username }">
-              <span class="fas fa-user"></span>
-              {{ userInfo.username }}
-            </a>
-          </li>
-          <li ui-sref-active="{ active: 'settings.**' }" ng-show="userInfo.username != 'guest'">
-            <a href="#/settings/account">
-              <span class="fas fa-cog"></span> {{ 'index.nav_settings' | translate }}
-            </a>
-          </li>
-          <li>
-            <a href="#" ng-click="logout($event)">
-              <span class="fas fa-power-off"></span> {{ 'index.logout' | translate }}
-            </a>
-          </li>
-        </ul>
+        <!-- 用户菜单 -->
+        <div class="top-bar-item" uib-dropdown>
+          <a href uib-dropdown-toggle class="top-bar-link">
+            <span class="fas fa-user-circle"></span>
+            <span class="hidden-xs">{{ userInfo.username }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href="#/settings/account"><span class="fas fa-id-card"></span> 个人信息</a></li>
+            <li><a href="#/settings/security"><span class="fas fa-shield-alt"></span> 安全设置</a></li>
+            <li class="divider"></li>
+            <li><a href="#" ng-click="logout($event)"><span class="fas fa-sign-out-alt"></span> 退出登录</a></li>
+          </ul>
+        </div>
+      </div>
       </div>
     </nav>
-    
-    <div ui-view="page">
-    </div>
 
-    <div class="row" ng-controller="Footer">
-      <div class="col-md-12 footer text-center text-muted small">
-        <div class="alert alert-danger" ng-show="app.global_storage_quota && app.global_storage_quota * 0.8 < app.global_storage_current"
-             translate="index.global_quota_warning"
-             translate-values="{ current: app.global_storage_current / 1000000, percent: app.global_storage_current / app.global_storage_quota * 100, total: app.global_storage_quota / 1000000 }">
-        </div>
-        <ul class="list-inline">
-          <li uib-dropdown class="dropdown">
-            <a href uib-dropdown-toggle>
-              <span ng-switch="currentLang">
-                <span ng-switch-when="en">English</span>
-                <span ng-switch-when="fr">Français</span>
-                <span ng-switch-when="de">Deutsch</span>
-                <span ng-switch-when="it">Italiano</span>
-                <span ng-switch-when="es">Española</span>
-                <span ng-switch-when="pt">Português</span>
-                <span ng-switch-when="el">Ελληνικά</span>
-                <span ng-switch-when="ru">Pусский</span>
-                <span ng-switch-when="pl">Polski</span>
-                <span ng-switch-when="zh_CN">简体中文</span>
-                <span ng-switch-when="zh_TW">繁體中文</span>
-                <span ng-switch-when="sq_AL">Shqip</span>
-              </span>
-              <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href ng-click="changeLanguage('en')" ng-class="{ 'bg-info': currentLang == 'en' }">English</a></li>
-              <li><a href ng-click="changeLanguage('fr')" ng-class="{ 'bg-info': currentLang == 'fr' }">Français</a></li>
-              <li><a href ng-click="changeLanguage('de')" ng-class="{ 'bg-info': currentLang == 'de' }">Deutsch</a></li>
-              <li><a href ng-click="changeLanguage('it')" ng-class="{ 'bg-info': currentLang == 'it' }">Italiano</a></li>
-              <li><a href ng-click="changeLanguage('es')" ng-class="{ 'bg-info': currentLang == 'es' }">Española</a></li>
-              <li><a href ng-click="changeLanguage('pt')" ng-class="{ 'bg-info': currentLang == 'pt' }">Português</a></li>
-              <li><a href ng-click="changeLanguage('el')" ng-class="{ 'bg-info': currentLang == 'el' }">Ελληνικά</a></li>
-              <li><a href ng-click="changeLanguage('ru')" ng-class="{ 'bg-info': currentLang == 'ru' }">Pусский</a></li>
-              <li><a href ng-click="changeLanguage('pl')" ng-class="{ 'bg-info': currentLang == 'pl' }">Polski</a></li>              
-			        <li><a href ng-click="changeLanguage('zh_CN')" ng-class="{ 'bg-info': currentLang == 'zh_CN' }">简体中文</a></li>
-              <li><a href ng-click="changeLanguage('zh_TW')" ng-class="{ 'bg-info': currentLang == 'zh_TW' }">繁體中文</a></li>
-              <li><a href ng-click="changeLanguage('sq_AL')" ng-class="{ 'bg-info': currentLang == 'sq_AL' }">Shqip</a></li>
-            </ul>
-          </li>
-          <li translate="document.default.footer_sismics"></li>
-          <li><a href="apidoc/">{{ 'document.default.api_documentation' | translate }}</a></li>
-          <li>v{{ app.current_version }}</li>
-        </ul>
-      </div>
-    </div>
+    <!-- ========== 侧边栏 ========== -->
+    <aside class="layout-sidebar" ng-class="{ collapsed: sidebarCollapsed }" ng-show="!userInfo.anonymous">
+      <div ng-include="'partial/docs/sidebar.html'"></div>
+    </aside>
+
+    <!-- ========== 主内容区 ========== -->
+    <main class="layout-content" ng-class="{ expanded: sidebarCollapsed, full: userInfo.anonymous }">
+      <div ui-view="page"></div>
+    </main>
+
   </body>
 </html>

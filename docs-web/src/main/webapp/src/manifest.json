@@ -1,7 +1,7 @@
 {
-  "name": "Teedy",
-  "short_name": "Teedy",
-  "theme_color": "#2ab2dc",
+  "name": "机关单位电子文档管理系统",
+  "short_name": "电子文档管理",
+  "theme_color": "#c41230",
   "background_color": "#ffffff",
   "display": "standalone",
   "Scope": "/",

@@ -188,6 +188,8 @@
               </systemProperties>
               <webApp>
                 <contextPath>/docs-web</contextPath>
+                <resourceBase>${project.basedir}/src/main/webapp/dist</resourceBase>
+                <descriptor>${project.basedir}/src/main/webapp/WEB-INF/web.xml</descriptor>
                 <overrideDescriptor>${project.basedir}/src/dev/main/webapp/web-override.xml</overrideDescriptor>
               </webApp>
             </configuration>
