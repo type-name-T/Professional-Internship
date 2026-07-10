@@ -10,68 +10,13 @@
       </a>
       <ul class="submenu" ng-show="isGroupOpen('work')">
         <li ui-sref-active="active">
-          <a href="#/dashboard">
-            <span class="fas fa-home"></span> 首页概况
-          </a>
-        </li>
-        <li class="submenu-header">收文管理</li>
-        <li ui-sref-active="active">
-          <a href="#/document/incoming/add">
-            <span class="fas fa-plus-circle"></span> 收文登记
-          </a>
+          <a href="#/dashboard"><span class="fas fa-home"></span> 首页概况</a>
         </li>
         <li ui-sref-active="active">
-          <a href="#/document/incoming/list">
-            <span class="fas fa-inbox"></span> 收文待办
-          </a>
+          <a href="#/document/list"><span class="fas fa-search"></span> 文档查询</a>
         </li>
         <li ui-sref-active="active">
-          <a href="#/document/list?type=RECEIVE">
-            <span class="fas fa-search"></span> 收文查询
-          </a>
-        </li>
-        <li class="submenu-header">发文管理</li>
-        <li ui-sref-active="active">
-          <a href="#/document/outgoing/add">
-            <span class="fas fa-paper-plane"></span> 发文拟稿
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/document/outgoing/list">
-            <span class="fas fa-tasks"></span> 发文待办
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/document/list?type=SEND">
-            <span class="fas fa-search"></span> 发文查询
-          </a>
-        </li>
-        <li class="submenu-header">其他文件</li>
-        <li ui-sref-active="active">
-          <a href="#/document/list?type=INTERNAL">
-            <span class="fas fa-file-alt"></span> 内部文件
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/document/list?type=MINUTES">
-            <span class="fas fa-clipboard-list"></span> 会议纪要
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/document/list?type=NOTICE">
-            <span class="fas fa-bullhorn"></span> 通知公告
-          </a>
-        </li>
-        <li class="submenu-header">档案管理</li>
-        <li ui-sref-active="active">
-          <a href="#/document/list?status=TO_ARCHIVE">
-            <span class="fas fa-archive"></span> 待归档
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/document/list?status=ARCHIVED">
-            <span class="fas fa-box"></span> 已归档
-          </a>
+          <a href="#/document/add"><span class="fas fa-plus-circle"></span> 新建文档</a>
         </li>
       </ul>
     </li>
@@ -85,30 +30,16 @@
       </a>
       <ul class="submenu" ng-show="isGroupOpen('personal')">
         <li ui-sref-active="active">
-          <a href="#/document/todo">
-            <span class="fas fa-clock"></span> 我的待办
-          </a>
+          <a href="#/document/mydocs"><span class="fas fa-folder"></span> 我的文档</a>
         </li>
         <li ui-sref-active="active">
-          <a href="#/document/done">
-            <span class="fas fa-check-circle"></span> 我的已办
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/document/mydocs">
-            <span class="fas fa-folder"></span> 我的文档
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/settings/account">
-            <span class="fas fa-id-card"></span> 个人信息
-          </a>
+          <a href="#/settings/account"><span class="fas fa-id-card"></span> 个人信息</a>
         </li>
       </ul>
     </li>
 
-    <!-- 系统管理 -->
-    <li class="menu-group" ng-show="userInfo.username != 'guest'">
+    <!-- 系统管理（管理员可见） -->
+    <li class="menu-group">
       <a class="menu-group-title" ng-click="toggleGroup('admin')">
         <span class="fas fa-cogs"></span>
         <span>系统管理</span>
@@ -116,35 +47,18 @@
       </a>
       <ul class="submenu" ng-show="isGroupOpen('admin')">
         <li ui-sref-active="active">
-          <a href="#/settings/department">
-            <span class="fas fa-building"></span> 部门管理
-          </a>
+          <a href="#/settings/department"><span class="fas fa-building"></span> 部门管理</a>
         </li>
         <li ui-sref-active="active">
-          <a href="#/settings/position">
-            <span class="fas fa-sitemap"></span> 岗位管理
-          </a>
+          <a href="#/settings/user"><span class="fas fa-users"></span> 用户管理</a>
         </li>
         <li ui-sref-active="active">
-          <a href="#/settings/user">
-            <span class="fas fa-users"></span> 用户管理
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/settings/workflow">
-            <span class="fas fa-random"></span> 流程配置
-          </a>
-        </li>
-        <li ui-sref-active="active">
-          <a href="#/settings/config">
-            <span class="fas fa-sliders-h"></span> 系统配置
-          </a>
+          <a href="#/settings/config"><span class="fas fa-sliders-h"></span> 系统配置</a>
         </li>
       </ul>
     </li>
   </ul>
 
-  <!-- 侧边栏底部信息 -->
   <div class="sidebar-footer">
     <div class="sidebar-footer-text">机关单位电子文档管理系统</div>
     <div class="sidebar-footer-version">v1.0</div>

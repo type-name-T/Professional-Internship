@@ -114,6 +114,7 @@ public class UserDao {
         userDb.setStorageCurrent(user.getStorageCurrent());
         userDb.setTotpKey(user.getTotpKey());
         userDb.setDisableDate(user.getDisableDate());
+        userDb.setDepartmentId(user.getDepartmentId());
 
         // Create audit log
         AuditLogUtil.create(userDb, AuditLogType.UPDATE, userId);
@@ -393,5 +394,49 @@ public class UserDao {
         query.setParameter("fromDate", fromDate.toDate());
         query.setParameter("toDate", toDate.toDate());
         return ((Number) query.getSingleResult()).longValue();
+    }
+
+    /**
+     * Find users by department ID.
+     */
+    @SuppressWarnings("unchecked")
+    public List<UserDto> findByDepartmentId(String deptId) {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        StringBuilder sb = new StringBuilder("select u.USE_ID_C as id, u.USE_USERNAME_C as username, u.USE_EMAIL_C as email, u.USE_CREATEDATE_D as createDate, u.USE_IDDEPARTMENT_C as deptId");
+        sb.append(" from T_USER u where u.USE_DELETEDATE_D is null");
+        if (deptId != null && !deptId.isEmpty()) {
+            sb.append(" and u.USE_IDDEPARTMENT_C = :deptId");
+        } else {
+            sb.append(" and u.USE_IDDEPARTMENT_C is not null");
+        }
+        Query q = em.createNativeQuery(sb.toString());
+        if (deptId != null && !deptId.isEmpty()) {
+            q.setParameter("deptId", deptId);
+        }
+        List<Object[]> rows = q.getResultList();
+        List<UserDto> result = new ArrayList<>();
+        for (Object[] row : rows) {
+            UserDto dto = new UserDto();
+            dto.setId((String) row[0]);
+            dto.setUsername((String) row[1]);
+            dto.setEmail((String) row[2]);
+            dto.setCreateTimestamp(((Timestamp) row[3]).getTime());
+            dto.setDepartmentId((String) row[4]);
+            result.add(dto);
+        }
+        return result;
+    }
+
+    /**
+     * Update user department.
+     */
+    public void updateDepartment(String username, String deptId) {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        Query q = em.createQuery("select u from User u where u.username = :username and u.deleteDate is null");
+        q.setParameter("username", username);
+        try {
+            User userDb = (User) q.getSingleResult();
+            userDb.setDepartmentId(deptId);
+        } catch (NoResultException ignored) {}
     }
 }

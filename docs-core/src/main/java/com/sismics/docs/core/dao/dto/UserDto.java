@@ -113,6 +113,10 @@ public class UserDto {
         this.totpKey = totpKey;
     }
 
+    public String getDepartmentId() { return departmentId; }
+    public void setDepartmentId(String departmentId) { this.departmentId = departmentId; }
+    private String departmentId;
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

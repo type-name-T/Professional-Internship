@@ -136,6 +136,15 @@ angular.module('docs',
         }
       }
     })
+    .state('settings.department', {
+      url: '/department',
+      views: {
+        'settings': {
+          templateUrl: 'partial/docs/settings.department.html',
+          controller: 'SettingsDepartment'
+        }
+      }
+    })
     .state('settings.config', {
       url: '/config',
       views: {
@@ -310,61 +319,8 @@ angular.module('docs',
         }
       }
     })
-    .state('document.incoming', {
-      url: '/incoming',
-      abstract: true,
-      views: {
-        'document': {
-          templateUrl: 'partial/docs/document.incoming.html',
-          controller: 'DocumentIncoming'
-        }
-      }
-    })
-    .state('document.incoming.add', {
-      url: '/add'
-    })
-    .state('document.outgoing', {
-      url: '/outgoing',
-      abstract: true,
-      views: {
-        'document': {
-          templateUrl: 'partial/docs/document.outgoing.html',
-          controller: 'DocumentOutgoing'
-        }
-      }
-    })
-    .state('document.outgoing.add', {
-      url: '/add'
-    })
-    .state('document.todo', {
-      url: '/todo',
-      views: {
-        'document': {
-          templateUrl: 'partial/docs/document.govlist.html',
-          controller: 'DocumentGovList'
-        }
-      }
-    })
-    .state('document.done', {
-      url: '/done',
-      views: {
-        'document': {
-          templateUrl: 'partial/docs/document.govlist.html',
-          controller: 'DocumentGovList'
-        }
-      }
-    })
     .state('document.mydocs', {
       url: '/mydocs',
-      views: {
-        'document': {
-          templateUrl: 'partial/docs/document.govlist.html',
-          controller: 'DocumentGovList'
-        }
-      }
-    })
-    .state('document.inbox', {
-      url: '/inbox',
       views: {
         'document': {
           templateUrl: 'partial/docs/document.govlist.html',

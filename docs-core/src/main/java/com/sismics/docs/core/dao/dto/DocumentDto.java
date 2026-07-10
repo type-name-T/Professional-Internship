@@ -111,6 +111,16 @@ public class DocumentDto {
      */
     private String highlight;
 
+    // ==== 机关单位扩展字段 ====
+    private String classificationId;
+    private String secrecyLevel;
+    private String urgency;
+    private String docNo;
+    private String fromUnit;
+    private String handlerDeptId;
+    private String handlerDeptName;
+    private String status;
+
     public String getId() {
         return id;
     }
@@ -281,4 +291,22 @@ public class DocumentDto {
         this.highlight = highlight;
         return this;
     }
+
+    // ==== 机关单位扩展字段 getters/setters ====
+    public String getClassificationId() { return classificationId; }
+    public void setClassificationId(String classificationId) { this.classificationId = classificationId; }
+    public String getSecrecyLevel() { return secrecyLevel; }
+    public void setSecrecyLevel(String secrecyLevel) { this.secrecyLevel = secrecyLevel; }
+    public String getUrgency() { return urgency; }
+    public void setUrgency(String urgency) { this.urgency = urgency; }
+    public String getDocNo() { return docNo; }
+    public void setDocNo(String docNo) { this.docNo = docNo; }
+    public String getFromUnit() { return fromUnit; }
+    public void setFromUnit(String fromUnit) { this.fromUnit = fromUnit; }
+    public String getHandlerDeptId() { return handlerDeptId; }
+    public void setHandlerDeptId(String handlerDeptId) { this.handlerDeptId = handlerDeptId; }
+    public String getHandlerDeptName() { return handlerDeptName; }
+    public void setHandlerDeptName(String handlerDeptName) { this.handlerDeptName = handlerDeptName; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
