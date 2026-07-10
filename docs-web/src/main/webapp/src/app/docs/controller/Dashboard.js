@@ -53,8 +53,8 @@ angular.module('docs').controller('Dashboard', function($scope, $state, Restangu
     // Use existing app data for doc counts if available
   });
 
-  // Load pending documents (using existing document API)
-  Restangular.all('document').getList({ limit: 5 }).then(function(data) {
+  // Load pending documents
+  Restangular.one('document/list').get({ limit: 5 }).then(function(data) {
     if (data && data.documents) {
       $scope.pendingList = data.documents.slice(0, 5);
       $scope.stats.pendingCount = data.total || $scope.pendingList.length;
@@ -62,12 +62,12 @@ angular.module('docs').controller('Dashboard', function($scope, $state, Restangu
   });
 
   // Load user's documents for stats
-  Restangular.all('document').getList({ limit: 1, creator: 'me' }).then(function(data) {
+  Restangular.one('document/list').get({ limit: 1 }).then(function(data) {
     $scope.stats.myDocCount = data.total || 0;
   });
 
   // Load recent documents as notices
-  Restangular.all('document').getList({ limit: 5, sort_column: 3, asc: false }).then(function(data) {
+  Restangular.one('document/list').get({ limit: 5, sort_column: 3, asc: false }).then(function(data) {
     if (data && data.documents) {
       $scope.noticeList = data.documents.slice(0, 5);
     }

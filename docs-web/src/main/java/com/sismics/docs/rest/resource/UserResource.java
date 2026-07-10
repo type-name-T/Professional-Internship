@@ -1119,6 +1119,41 @@ public class UserResource extends BaseResource {
     }
 
     /**
+     * List users by department.
+     */
+    @GET
+    @Path("department/users")
+    public Response listByDepartment(@QueryParam("department") String deptId) {
+        if (!authenticate()) throw new ForbiddenClientException();
+        UserDao dao = new UserDao();
+        List<UserDto> users = dao.findByDepartmentId(deptId);
+        JsonArrayBuilder arr = Json.createArrayBuilder();
+        for (UserDto u : users) {
+            arr.add(Json.createObjectBuilder()
+                .add("id", u.getId())
+                .add("username", u.getUsername())
+                .add("email", u.getEmail())
+                .add("department_id", u.getDepartmentId() != null ? u.getDepartmentId() : ""));
+        }
+        return Response.ok().entity(Json.createObjectBuilder()
+            .add("users", arr).add("total", users.size()).build()).build();
+    }
+
+    /**
+     * Update user department.
+     */
+    @POST
+    @Path("{username: [a-zA-Z0-9_]+}/department")
+    public Response updateDepartment(
+            @PathParam("username") String username,
+            @FormParam("department_id") String deptId) {
+        if (!authenticate()) throw new ForbiddenClientException();
+        checkBaseFunction(BaseFunction.ADMIN);
+        new UserDao().updateDepartment(username, deptId);
+        return Response.ok().entity(Json.createObjectBuilder().add("status", "ok").build()).build();
+    }
+
+    /**
      * Send the events about documents and files being deleted.
      * @param documentList A document list
      * @param fileList A file list

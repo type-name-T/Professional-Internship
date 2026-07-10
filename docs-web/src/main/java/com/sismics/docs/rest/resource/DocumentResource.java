@@ -498,6 +498,20 @@ public class DocumentResource extends BaseResource {
             throw new ServerException("SearchError", "Error searching in documents", e);
         }
 
+        // Populate extended fields from database (not available in Lucene index)
+        for (DocumentDto dto : paginatedList.getResultList()) {
+            Document doc = new DocumentDao().getById(dto.getId());
+            if (doc != null) {
+                dto.setClassificationId(doc.getClassificationId());
+                dto.setSecrecyLevel(doc.getSecrecyLevel());
+                dto.setUrgency(doc.getUrgency());
+                dto.setDocNo(doc.getDocNo());
+                dto.setFromUnit(doc.getFromUnit());
+                dto.setHandlerDeptId(doc.getHandlerDeptId());
+                dto.setStatus(doc.getStatus());
+            }
+        }
+
         // Find the files of the documents
         Iterable<String> documentsIds = CollectionUtils.collect(paginatedList.getResultList(), DocumentDto::getId);
         FileDao fileDao = new FileDao();

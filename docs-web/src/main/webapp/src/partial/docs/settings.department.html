@@ -1,0 +1,97 @@
+<!-- 部门管理 -->
+<div class="department-manage">
+  <div class="page-header">
+    <h3 class="page-title"><span class="fas fa-building"></span> 部门管理</h3>
+    <button class="btn btn-sm btn-primary" ng-click="showAddForm = !showAddForm">
+      <span class="fas fa-plus"></span> 新增部门
+    </button>
+  </div>
+
+  <!-- 添加部门表单 -->
+  <div class="panel panel-default" ng-if="showAddForm">
+    <div class="panel-heading">新增部门</div>
+    <div class="panel-body">
+      <form class="form-inline">
+        <div class="form-group">
+          <label>部门名称</label>
+          <input class="form-control" ng-model="newDept.name" placeholder="部门名称" />
+        </div>
+        <div class="form-group">
+          <label>部门编码</label>
+          <input class="form-control" ng-model="newDept.code" placeholder="编码" />
+        </div>
+        <div class="form-group">
+          <label>上级部门</label>
+          <select class="form-control" ng-model="newDept.parentId">
+            <option value="">无（顶级部门）</option>
+            <option ng-repeat="d in departments" value="{{ d.id }}">{{ d.name }}</option>
+          </select>
+        </div>
+        <button class="btn btn-success" ng-click="addDepartment()">保存</button>
+        <button class="btn btn-default" ng-click="showAddForm = false">取消</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 部门列表 -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">部门列表</div>
+        <table class="table table-striped">
+          <thead>
+            <tr><th>编码</th><th>部门名称</th><th>用户数</th><th>操作</th></tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="d in departments">
+              <td>{{ d.code }}</td>
+              <td>
+                <span ng-if="d.parent_id" style="padding-left: 20px;">├ </span>
+                {{ d.name }}
+              </td>
+              <td><span class="badge">{{ d.userCount || 0 }}</span></td>
+              <td>
+                <button class="btn btn-xs btn-info" ng-click="selectDept(d)">查看用户</button>
+                <button class="btn btn-xs btn-danger" ng-click="deleteDepartment(d.id)">删除</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 部门用户列表 -->
+    <div class="col-md-6" ng-if="selectedDept">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          {{ selectedDept.name }} — 部门用户
+          <button class="btn btn-xs btn-primary pull-right" ng-click="showAddUser = !showAddUser">添加用户</button>
+        </div>
+        <div class="panel-body" ng-if="showAddUser">
+          <form class="form-inline">
+            <div class="form-group">
+              <label>用户名</label>
+              <input class="form-control input-sm" ng-model="addUserName" placeholder="输入用户名" />
+            </div>
+            <button class="btn btn-sm btn-success" ng-click="addUserToDept()">确认添加</button>
+          </form>
+        </div>
+        <table class="table table-striped">
+          <thead><tr><th>用户名</th><th>邮箱</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr ng-repeat="u in deptUsers">
+              <td>{{ u.username }}</td>
+              <td>{{ u.email }}</td>
+              <td>
+                <button class="btn btn-xs btn-warning" ng-click="removeUserFromDept(u.username)">移出部门</button>
+              </td>
+            </tr>
+            <tr ng-if="deptUsers.length === 0">
+              <td colspan="3" class="text-center text-muted">暂无用户</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

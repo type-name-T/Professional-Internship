@@ -78,6 +78,71 @@
         </div>
       </div>
 
+      <!-- 机关单位公文属性 -->
+      <div class="form-group" ng-init="govMetaCollapsed = false">
+        <div class="col-sm-offset-2 col-sm-10">
+          <a href ng-click="govMetaCollapsed = !govMetaCollapsed" class="btn btn-sm btn-default">
+            <span class="fas fa-cog"></span> 公文属性 (分类/密级/状态)
+            <span class="fas" ng-class="govMetaCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></span>
+          </a>
+        </div>
+      </div>
+      <div ng-show="!govMetaCollapsed">
+        <div class="form-group">
+          <label class="col-sm-2 control-label">公文分类</label>
+          <div class="col-sm-4">
+            <select class="form-control" ng-model="document.classification">
+              <option value="">请选择</option>
+              <option value="RECEIVE">收文</option>
+              <option value="SEND">发文</option>
+              <option value="MINUTES">会议纪要</option>
+              <option value="NOTICE">通知公告</option>
+              <option value="REPORT">工作报告</option>
+              <option value="INTERNAL">内部文件</option>
+            </select>
+          </div>
+          <label class="col-sm-2 control-label">密级</label>
+          <div class="col-sm-4">
+            <select class="form-control" ng-model="document.secrecy_level">
+              <option value="PUBLIC">公开</option>
+              <option value="INTERNAL" selected>内部</option>
+              <option value="SECRET">秘密</option>
+              <option value="CONFIDENTIAL">机密</option>
+              <option value="TOP_SECRET">绝密</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">紧急程度</label>
+          <div class="col-sm-4">
+            <select class="form-control" ng-model="document.urgency">
+              <option value="NORMAL" selected>一般</option>
+              <option value="URGENT">紧急</option>
+              <option value="EMERGENCY">特急</option>
+            </select>
+          </div>
+          <label class="col-sm-2 control-label">状态</label>
+          <div class="col-sm-4">
+            <select class="form-control" ng-model="document.doc_status">
+              <option value="DRAFT" selected>拟稿</option>
+              <option value="REVIEWING">审核中</option>
+              <option value="APPROVED">已签发</option>
+              <option value="ARCHIVED">已归档</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">发文字号</label>
+          <div class="col-sm-4">
+            <input class="form-control" type="text" ng-model="document.doc_no" placeholder="如：XX发〔2026〕001号" />
+          </div>
+          <label class="col-sm-2 control-label">来文单位</label>
+          <div class="col-sm-4">
+            <input class="form-control" type="text" ng-model="document.from_unit" placeholder="来文单位名称" />
+          </div>
+        </div>
+      </div>
+
       <!-- Custom metadata -->
       <div class="form-group"
            ng ng-repeat="meta in document.metadata"

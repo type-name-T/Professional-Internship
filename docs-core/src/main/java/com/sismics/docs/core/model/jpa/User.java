@@ -95,6 +95,12 @@ public class User implements Loggable {
     @Column(name = "USE_DISABLEDATE_D")
     private Date disableDate;
 
+    /**
+     * Department ID.
+     */
+    @Column(name = "USE_IDDEPARTMENT_C", length = 36)
+    private String departmentId;
+
     public String getId() {
         return id;
     }
@@ -212,6 +218,9 @@ public class User implements Loggable {
         this.onboarding = onboarding;
         return this;
     }
+
+    public String getDepartmentId() { return departmentId; }
+    public User setDepartmentId(String departmentId) { this.departmentId = departmentId; return this; }
 
     @Override
     public String toString() {
