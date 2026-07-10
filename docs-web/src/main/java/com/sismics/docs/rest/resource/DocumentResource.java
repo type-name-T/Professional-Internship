@@ -196,7 +196,16 @@ public class DocumentResource extends BaseResource {
                 .add("rights", JsonUtil.nullable(documentDto.getRights()))
                 .add("source", JsonUtil.nullable(documentDto.getSource()))
                 .add("subject", JsonUtil.nullable(documentDto.getSubject()))
-                .add("type", JsonUtil.nullable(documentDto.getType()));
+                .add("type", JsonUtil.nullable(documentDto.getType()))
+                // 机关单位扩展字段
+                .add("classification", JsonUtil.nullable(documentDto.getClassificationId()))
+                .add("secrecy_level", JsonUtil.nullable(documentDto.getSecrecyLevel()))
+                .add("urgency", JsonUtil.nullable(documentDto.getUrgency()))
+                .add("doc_no", JsonUtil.nullable(documentDto.getDocNo()))
+                .add("from_unit", JsonUtil.nullable(documentDto.getFromUnit()))
+                .add("handler_dept_id", JsonUtil.nullable(documentDto.getHandlerDeptId()))
+                .add("handler_dept_name", JsonUtil.nullable(documentDto.getHandlerDeptName()))
+                .add("doc_status", JsonUtil.nullable(documentDto.getStatus()));
 
         List<TagDto> tagDtoList = null;
         if (principal.isAnonymous()) {
@@ -521,6 +530,12 @@ public class DocumentResource extends BaseResource {
                     .add("current_step_name", JsonUtil.nullable(documentDto.getCurrentStepName()))
                     .add("highlight", JsonUtil.nullable(documentDto.getHighlight()))
                     .add("file_count", filesCount)
+                    .add("classification", JsonUtil.nullable(documentDto.getClassificationId()))
+                    .add("secrecy_level", JsonUtil.nullable(documentDto.getSecrecyLevel()))
+                    .add("urgency", JsonUtil.nullable(documentDto.getUrgency()))
+                    .add("doc_no", JsonUtil.nullable(documentDto.getDocNo()))
+                    .add("from_unit", JsonUtil.nullable(documentDto.getFromUnit()))
+                    .add("doc_status", JsonUtil.nullable(documentDto.getStatus()))
                     .add("tags", createTagsArrayBuilder(tagDtoList));
 
             if (Boolean.TRUE == files) {
@@ -673,7 +688,19 @@ public class DocumentResource extends BaseResource {
             @FormParam("metadata_id") List<String> metadataIdList,
             @FormParam("metadata_value") List<String> metadataValueList,
             @FormParam("language") String language,
-            @FormParam("create_date") String createDateStr) {
+            @FormParam("create_date") String createDateStr,
+            // 机关单位扩展字段
+            @FormParam("classification") String classificationId,
+            @FormParam("secrecy_level") String secrecyLevel,
+            @FormParam("urgency") String urgency,
+            @FormParam("doc_no") String docNo,
+            @FormParam("from_unit") String fromUnit,
+            @FormParam("handler_dept_id") String handlerDeptId,
+            @FormParam("handler_user_id") String handlerUserId,
+            @FormParam("doc_date") String docDateStr,
+            @FormParam("retention") String retention,
+            @FormParam("archive_no") String archiveNo,
+            @FormParam("doc_status") String docStatus) {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
@@ -713,6 +740,22 @@ public class DocumentResource extends BaseResource {
             document.setCreateDate(new Date());
         } else {
             document.setCreateDate(createDate);
+        }
+
+        // 机关单位扩展字段
+        document.setClassificationId(classificationId);
+        document.setSecrecyLevel(secrecyLevel != null ? secrecyLevel : "INTERNAL");
+        document.setUrgency(urgency != null ? urgency : "NORMAL");
+        document.setDocNo(docNo);
+        document.setFromUnit(fromUnit);
+        document.setHandlerDeptId(handlerDeptId);
+        document.setHandlerUserId(handlerUserId);
+        document.setRetention(retention);
+        document.setArchiveNo(archiveNo);
+        document.setStatus(docStatus != null ? docStatus : "DRAFT");
+        Date docDate = ValidationUtil.validateDate(docDateStr, "doc_date", true);
+        if (docDate != null) {
+            document.setDocDate(docDate);
         }
 
         // Save the document, create the base ACLs
@@ -795,7 +838,19 @@ public class DocumentResource extends BaseResource {
             @FormParam("metadata_id") List<String> metadataIdList,
             @FormParam("metadata_value") List<String> metadataValueList,
             @FormParam("language") String language,
-            @FormParam("create_date") String createDateStr) {
+            @FormParam("create_date") String createDateStr,
+            // 机关单位扩展字段
+            @FormParam("classification") String classificationId,
+            @FormParam("secrecy_level") String secrecyLevel,
+            @FormParam("urgency") String urgency,
+            @FormParam("doc_no") String docNo,
+            @FormParam("from_unit") String fromUnit,
+            @FormParam("handler_dept_id") String handlerDeptId,
+            @FormParam("handler_user_id") String handlerUserId,
+            @FormParam("doc_date") String docDateStr,
+            @FormParam("retention") String retention,
+            @FormParam("archive_no") String archiveNo,
+            @FormParam("doc_status") String docStatus) {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
@@ -847,6 +902,20 @@ public class DocumentResource extends BaseResource {
         } else {
             document.setCreateDate(createDate);
         }
+
+        // 机关单位扩展字段
+        if (classificationId != null) document.setClassificationId(classificationId);
+        if (secrecyLevel != null) document.setSecrecyLevel(secrecyLevel);
+        if (urgency != null) document.setUrgency(urgency);
+        if (docNo != null) document.setDocNo(docNo);
+        if (fromUnit != null) document.setFromUnit(fromUnit);
+        if (handlerDeptId != null) document.setHandlerDeptId(handlerDeptId);
+        if (handlerUserId != null) document.setHandlerUserId(handlerUserId);
+        if (retention != null) document.setRetention(retention);
+        if (archiveNo != null) document.setArchiveNo(archiveNo);
+        if (docStatus != null) document.setStatus(docStatus);
+        Date docDate = ValidationUtil.validateDate(docDateStr, "doc_date", true);
+        if (docDate != null) document.setDocDate(docDate);
 
         documentDao.update(document, principal.getId());
 

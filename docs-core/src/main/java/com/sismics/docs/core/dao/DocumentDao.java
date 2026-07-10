@@ -90,7 +90,8 @@ public class DocumentDao {
         StringBuilder sb = new StringBuilder("select distinct d.DOC_ID_C, d.DOC_TITLE_C, d.DOC_DESCRIPTION_C, d.DOC_SUBJECT_C, d.DOC_IDENTIFIER_C, d.DOC_PUBLISHER_C, d.DOC_FORMAT_C, d.DOC_SOURCE_C, d.DOC_TYPE_C, d.DOC_COVERAGE_C, d.DOC_RIGHTS_C, d.DOC_CREATEDATE_D, d.DOC_UPDATEDATE_D, d.DOC_LANGUAGE_C, d.DOC_IDFILE_C,");
         sb.append(" (select count(s.SHA_ID_C) from T_SHARE s, T_ACL ac where ac.ACL_SOURCEID_C = d.DOC_ID_C and ac.ACL_TARGETID_C = s.SHA_ID_C and ac.ACL_DELETEDATE_D is null and s.SHA_DELETEDATE_D is null) shareCount, ");
         sb.append(" (select count(f.FIL_ID_C) from T_FILE f where f.FIL_DELETEDATE_D is null and f.FIL_IDDOC_C = d.DOC_ID_C) fileCount, ");
-        sb.append(" u.USE_USERNAME_C ");
+        sb.append(" u.USE_USERNAME_C, ");
+        sb.append(" d.DOC_IDCLASSIFICATION_C, d.DOC_SECRECYLEVEL_C, d.DOC_URGENCY_C, d.DOC_DOCNO_C, d.DOC_FROMUNIT_C, d.DOC_IDHANDLERDEPT_C, d.DOC_STATUS_C, d.DOC_DOCDATE_D ");
         sb.append(" from T_DOCUMENT d ");
         sb.append(" join T_USER u on d.DOC_IDUSER_C = u.USE_ID_C ");
         sb.append(" where d.DOC_ID_C = :id and d.DOC_DELETEDATE_D is null ");
@@ -124,7 +125,16 @@ public class DocumentDao {
         documentDto.setFileId((String) o[i++]);
         documentDto.setShared(((Number) o[i++]).intValue() > 0);
         documentDto.setFileCount(((Number) o[i++]).intValue());
-        documentDto.setCreator((String) o[i]);
+        documentDto.setCreator((String) o[i++]);
+        // 机关单位扩展字段
+        documentDto.setClassificationId((String) o[i++]);
+        documentDto.setSecrecyLevel((String) o[i++]);
+        documentDto.setUrgency((String) o[i++]);
+        documentDto.setDocNo((String) o[i++]);
+        documentDto.setFromUnit((String) o[i++]);
+        documentDto.setHandlerDeptId((String) o[i++]);
+        documentDto.setStatus((String) o[i++]);
+        // docDate (o[i++]) is timestamp, skip or store if needed
         return documentDto;
     }
     
@@ -218,6 +228,18 @@ public class DocumentDao {
         documentDb.setLanguage(document.getLanguage());
         documentDb.setFileId(document.getFileId());
         documentDb.setUpdateDate(new Date());
+        // 机关单位扩展字段
+        documentDb.setClassificationId(document.getClassificationId());
+        documentDb.setSecrecyLevel(document.getSecrecyLevel());
+        documentDb.setUrgency(document.getUrgency());
+        documentDb.setDocNo(document.getDocNo());
+        documentDb.setFromUnit(document.getFromUnit());
+        documentDb.setHandlerDeptId(document.getHandlerDeptId());
+        documentDb.setHandlerUserId(document.getHandlerUserId());
+        documentDb.setDocDate(document.getDocDate());
+        documentDb.setRetention(document.getRetention());
+        documentDb.setArchiveNo(document.getArchiveNo());
+        documentDb.setStatus(document.getStatus());
         
         // Create audit log
         AuditLogUtil.create(documentDb, AuditLogType.UPDATE, userId);

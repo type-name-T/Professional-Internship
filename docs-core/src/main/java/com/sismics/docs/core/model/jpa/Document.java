@@ -118,6 +118,41 @@ public class Document implements Loggable {
      */
     @Column(name = "DOC_DELETEDATE_D")
     private Date deleteDate;
+
+    // ==== 机关单位扩展字段 ====
+
+    @Column(name = "DOC_IDCLASSIFICATION_C", length = 36)
+    private String classificationId;
+
+    @Column(name = "DOC_SECRECYLEVEL_C", length = 20)
+    private String secrecyLevel;
+
+    @Column(name = "DOC_URGENCY_C", length = 20)
+    private String urgency;
+
+    @Column(name = "DOC_DOCNO_C", length = 100)
+    private String docNo;
+
+    @Column(name = "DOC_FROMUNIT_C", length = 200)
+    private String fromUnit;
+
+    @Column(name = "DOC_IDHANDLERDEPT_C", length = 36)
+    private String handlerDeptId;
+
+    @Column(name = "DOC_IDHANDLERUSER_C", length = 36)
+    private String handlerUserId;
+
+    @Column(name = "DOC_DOCDATE_D")
+    private Date docDate;
+
+    @Column(name = "DOC_RETENTION_C", length = 20)
+    private String retention;
+
+    @Column(name = "DOC_ARCHIVENO_C", length = 100)
+    private String archiveNo;
+
+    @Column(name = "DOC_STATUS_C", length = 20)
+    private String status;
     
     public String getId() {
         return id;
@@ -256,6 +291,30 @@ public class Document implements Loggable {
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
     }
+
+    // ==== 机关单位扩展字段 getters/setters ====
+    public String getClassificationId() { return classificationId; }
+    public void setClassificationId(String classificationId) { this.classificationId = classificationId; }
+    public String getSecrecyLevel() { return secrecyLevel; }
+    public void setSecrecyLevel(String secrecyLevel) { this.secrecyLevel = secrecyLevel; }
+    public String getUrgency() { return urgency; }
+    public void setUrgency(String urgency) { this.urgency = urgency; }
+    public String getDocNo() { return docNo; }
+    public void setDocNo(String docNo) { this.docNo = docNo; }
+    public String getFromUnit() { return fromUnit; }
+    public void setFromUnit(String fromUnit) { this.fromUnit = fromUnit; }
+    public String getHandlerDeptId() { return handlerDeptId; }
+    public void setHandlerDeptId(String handlerDeptId) { this.handlerDeptId = handlerDeptId; }
+    public String getHandlerUserId() { return handlerUserId; }
+    public void setHandlerUserId(String handlerUserId) { this.handlerUserId = handlerUserId; }
+    public Date getDocDate() { return docDate; }
+    public void setDocDate(Date docDate) { this.docDate = docDate; }
+    public String getRetention() { return retention; }
+    public void setRetention(String retention) { this.retention = retention; }
+    public String getArchiveNo() { return archiveNo; }
+    public void setArchiveNo(String archiveNo) { this.archiveNo = archiveNo; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     @Override
     public String toString() {
